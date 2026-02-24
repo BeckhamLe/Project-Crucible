@@ -56,9 +56,9 @@ The outcome is genuinely unknown. They might form a democracy, a hierarchy, a pr
 
 ### Hypotheses Being Tested
 
-- **H1:** Conflicting personas under scarcity produce governance — at least one rule is proposed within 30 rounds.
+- **H1:** Conflicting personas under scarcity produce governance — at least one rule is proposed within the first half of the simulation.
 - **H2:** Persona predicts governance preference — Builder agents push efficiency rules, Judge agents push fairness rules, Rebel agents resist all rules.
-- **H3:** Credit inequality emerges without intervention — Gini coefficient exceeds 0.3 within 30 rounds.
+- **H3:** Credit inequality emerges without intervention — Gini coefficient exceeds 0.3 by the end of the run.
 
 ---
 
@@ -130,18 +130,38 @@ The infrastructure is built. The experiments are what's left.
 
 ---
 
+## Cost & Run Strategy
+
+All runs use Claude 3.5 Haiku ($1.00/1M input, $5.00/1M output).
+
+| Phase | Agents | Rounds | Runs | Est. Cost |
+|---|---|---|---|---|
+| Proof of Concept | 3 | 30 | 1 | ~$1 |
+| Full Experiment (batch 1) | 8 | 50 | 3 | ~$13 |
+| Full Experiment (batch 2) | 8 | 50 | 2 | ~$9 |
+| **Total** | | | **5 runs** | **~$23** |
+
+**Why 50 rounds instead of 100:** LLM agents settle into behavioral patterns faster than humans. Research on multi-agent LLM simulations shows governance dynamics emerge within the first 25-35 rounds and rounds beyond 50 mostly repeat established patterns. Cutting rounds in half is essentially free analytically.
+
+**Why staged runs (3 then 2):** Run the first 3, check results, fix any config issues before committing the last $9. Same 5 total runs, staged to avoid burning budget on a broken config.
+
+**Why 5 runs:** With fewer than 3, you can't distinguish "this always happens" from "this happened by chance." 5 runs is the floor for claiming a behavioral pattern is robust across different conditions.
+
+---
+
 ## Timeline
 
 ### Days 1–2: Proof of Concept
 - 3 agents (Builder, Rebel, Judge), 30 rounds, 10 credits each
-- Cost: ~$1–2 in API calls
+- Cost: ~$1 in API calls
 - Deliverable: First run results — charts, governance timeline, initial findings against H1–H3
 
 ### Days 3–4: Full Experiment
 - Scale to 8 agents (add Philosopher, Hustler, Caretaker, Mystic, Strategist)
-- 100 rounds, 5 runs with different random seeds
-- Compare governance outcomes across seeds — is the result stable or chaotic?
-- Analyze network graphs for alliance structure
+- 50 rounds, 3 runs with different random seeds (batch 1)
+- Analyze results, tune if needed, then run 2 more (batch 2)
+- Compare governance outcomes across all 5 runs — stable or chaotic?
+- Analyze network graphs for alliance structure and faction formation
 
 ### Day 5: Write-Up and Demo Prep
 - Findings document: what happened, what was predicted, what was surprising
