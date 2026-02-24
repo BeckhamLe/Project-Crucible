@@ -1,0 +1,8 @@
+{
+  "hypothesis": "Conflicting personas produce governance under scarcity — Builder/Rebel/Judge with 10 credits each over 30 rounds",
+  "persona_names": ["Builder", "Rebel", "Judge"],
+  "simulation": {
+    "rounds": 30,
+    "seed": 42
+  }
+}
