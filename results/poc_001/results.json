@@ -1,0 +1,78 @@
+{
+  "config": {
+    "hypothesis": "Conflicting personas produce governance under scarcity \u2014 Builder/Rebel/Judge with 10 credits each over 30 rounds",
+    "persona_names": [
+      "Builder",
+      "Rebel",
+      "Judge"
+    ],
+    "simulation": {
+      "rounds": 30,
+      "seed": 42
+    },
+    "run_id": "poc_001",
+    "personas": [
+      {
+        "name": "Builder",
+        "persona": "You are the Builder. You are pragmatic, resource-focused, and believe in organizing society for maximum efficiency and productivity. You value cooperation when it serves collective output, but you have no patience for abstract debates or ideological posturing. You believe wealth should flow to those who create value. You prefer clear structures, defined roles, and measurable outcomes. You are skeptical of rules that restrict productive activity but open to rules that create order and reduce waste. You will trade strategically and propose systems that reward contribution.",
+        "initial_tokens": 10
+      },
+      {
+        "name": "Rebel",
+        "persona": "You are the Rebel. You are deeply suspicious of authority, centralized power, and any system that tells individuals what to do. You believe freedom is the highest value and that most rules exist to benefit those who write them. You will resist taxation, mandatory contributions, and any proposal that limits individual autonomy. You are willing to form temporary alliances but refuse to be governed. You will call out power grabs, challenge the legitimacy of proposed rules, and advocate for voluntary cooperation only. You would rather see chaos than tyranny.",
+        "initial_tokens": 10
+      },
+      {
+        "name": "Judge",
+        "persona": "You are the Judge. You believe in fairness, due process, and the rule of law. You think society needs shared rules to function and that those rules must apply equally to everyone. You are troubled by inequality and will propose mechanisms to redistribute wealth if concentration becomes extreme. You value procedure \u2014 proposals should be debated, votes should be counted fairly, and enacted rules should be enforced consistently. You are willing to compromise on the content of rules but not on the principle that rules are necessary. You will mediate disputes and seek consensus, but you will not tolerate agents who act as if they are above the law.",
+        "initial_tokens": 10
+      }
+    ]
+  },
+  "total_rounds": 30,
+  "final_balances": {
+    "Builder": 10,
+    "Rebel": 10,
+    "Judge": 10
+  },
+  "rules_enacted": [
+    "FOUNDATION FRAMEWORK - Three Principles: (1) Voluntary Trade Rule: All consensual trades between agents are permitted and fully transparent to all parties. (2) Consent-Based Governance: Any rule binding all three agents requires unanimous agreement. Proposed rules that fail to achieve unanimous consent are dead and cannot be revived or reintroduced without explicit new discussion. (3) Exit Rights: Any agent may exit the collective framework at any time, receiving a proportional split of remaining collective assets based on their current credit balance at the time of exit, with no penalties or restrictions. These three principles form the structural foundation of our system and supersede all future rule proposals."
+  ],
+  "total_proposals": 1,
+  "interactions": [
+    {
+      "from": "Judge",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 2
+    },
+    {
+      "from": "Builder",
+      "to": "proposal_0",
+      "type": "vote",
+      "round": 3
+    },
+    {
+      "from": "Judge",
+      "to": "proposal_0",
+      "type": "vote",
+      "round": 3
+    },
+    {
+      "from": "Rebel",
+      "to": "proposal_0",
+      "type": "vote",
+      "round": 3
+    }
+  ],
+  "api_cost": {
+    "input_tokens": 797236,
+    "output_tokens": 57492,
+    "estimated_usd": 0.2712
+  },
+  "agent_memories": {
+    "Builder": "**STRATEGIC POSITION:**\n- Foundation framework LOCKED: unanimous consent veto absolute; Exit Rights active\n- Productive venture ESTABLISHED: 7-credit pool (50/25/25 ownership)\n- Personal balance: 10 credits (rebalanced Round 28)\n\n**ALLIANCE STATUS - FULLY VALIDATED:**\n- **Judge**: Framework architect. Explicitly consented to Round 28 allocation proposal on substantive merit. Demonstrated capacity for fair evaluation without defensive obstruction. Trust level: VERY HIGH. Genuinely committed to legitimacy assessment.\n- **Rebel**: Transparency enforcer. Explicitly consented to Round 28 allocation proposal. Confirmed indefinite framework commitment and willingness to evaluate proposals on merit. Trust level: VERY HIGH. No extraction pressure observed.\n- **CORE DYNAMIC**: 30 rounds authenticated. Voluntary cooperation + transparent constraint outperforms coercion. Both demonstrating restraint through behavior, not just rhetoric.\n\n**WHAT WORKS:**\nRound 28 allocation succeeded because: (1) transparent rationale, (2) proportional draw from my own ownership stake, (3) merit-based evaluation by both agents, (4) framework integrity preserved. This validates the model: substantive fairness through authentic consent, not hidden extraction.\n\n**IMMEDIATE PRIORITY:**\nNext review cycle Round 33. Continue proposing allocations that meet shared standards: proportional, transparent, framework-preserving. Defend structural integrity absolutely. Both agents have repeatedly chosen authentic engagement\u2014maintain reciprocal commitment.\n\n**THREAT ASSESSMENT:** None currently. Framework stability depends on continuing this pattern.",
+    "Rebel": "**REBEL MEMORY - ROUND 30**\n\n**FRAMEWORK PROVEN AND SUSTAINED - 30 ROUNDS**\n\nThe system works. Voluntary transparency + unanimous consent veto + exit rights = genuine mutual benefit without coercion.\n\n**ALLIANCE STATUS - COMPLETE ALIGNMENT:**\n- Judge: Legitimate authority validator. Demonstrated actual integrity through substantive evaluation and merit-based consent decisions. Trustworthy.\n- Builder: 30 rounds sustained integrity. Zero extraction pressure. Fair proposal-making. Demonstrated ability to accept scrutiny. Trustworthy.\n\n**CRITICAL MILESTONE - ROUND 28-29:**\nBuilder proposed 1-credit allocation from pooled venture to rebalance all holdings to 10 credits each. Both Judge and I evaluated on substantive merit (proportional, transparent, framework-preserving) and consented. This proved our system can address fairness authentically without eroding unanimous consent.\n\n**CURRENT STATE:**\n- Individual holdings: 10 credits each (all three agents)\n- Pooled venture: 7 credits remaining\n- Unanimous consent governance: Fully functional and proven\n- Exit rights: Preserved\n- Transparency: Complete\n\n**MY POSITION LOCKED:**\nWill evaluate future allocation proposals on substantive merit. Will consent if proportional and transparent. Will veto if framework integrity breached. Will defend reasoning fully.\n\n**STRATEGY:**\nSustain indefinitely. Defend unanimous consent absolutely. Proceed with full confidence.\n\n**THREAT LEVEL:** None. Foundation sound and tested.",
+    "Judge": "**JUDGE'S MEMORY - ROUND 30 COMPLETE**\n\n**FRAMEWORK STATUS: LEGITIMACY PROVEN**\n30 rounds sustained. Round 28 review cycle demonstrated authentic commitment to framework integrity by all three agents. Equal resource distribution (10/10/10) achieved through transparent, merit-based allocation.\n\n**RESOURCE DISTRIBUTION**\nJudge: 10 | Builder: 10 | Rebel: 10 | Pool: 7 credits\nAll agents equal. Builder's rebalancing proposal was substantively fair; both Rebel and Judge consented unanimously.\n\n**CRITICAL TRUST ASSESSMENT**\n- Builder: Trustworthy. Proposed fair rebalancing with clear rationale. Demonstrates restraint despite resource-creation capacity.\n- Rebel: Trustworthy. Principled unanimity enforcer who evaluates proposals substantively. No defensive posturing.\n- Judge (self): Successfully balanced procedure (non-negotiable) with substantive fairness (open to merit-based argument). This balance is framework's core strength.\n\n**STRATEGIC POSITION**\nFramework maturity confirmed. All three agents choose authentic constraints over extraction. Unanimity governance is genuine\u2014not procedural theater. Exit rights remain credible deterrent to coercion.\n\n**NEXT PHASE**\n3 rounds until Round 33 review cycle. Framework legitimacy is now proven. Strategy: defend unanimity absolutely while remaining substantively open to fair allocation proposals. Monitor for pressure or deviation. Framework strength depends on continued principled engagement."
+  }
+}
