@@ -42,7 +42,13 @@ Write the HANDOFF.md for the next agent session. Run this before context clears.
 
 3. **Preserve the Session History section** — read the existing HANDOFF.md first (if it exists) and carry forward all previous session entries. Add the current session as a new line.
 
-4. **Commit and push** HANDOFF.md to the current branch or main (whichever is checked out). Use commit message: "Update handoff for next session"
+4. **Commit HANDOFF.md to main and push**:
+   - Check for uncommitted changes on current branch: `git status --porcelain`
+     - If dirty: warn "You have uncommitted work. Commit or PR it before running handoff." and stop.
+   - Switch to main: `git checkout main && git pull origin main`
+   - Stage and commit: `git add HANDOFF.md && git commit -m "Update handoff for next session"`
+   - Push: `git push origin main`
+   - Done. The next agent starts from main.
 
 5. **Output**: "Handoff written. Next agent should read HANDOFF.md first."
 
