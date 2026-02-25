@@ -22,7 +22,11 @@ def build_communication_graph(interactions: list[dict]) -> nx.DiGraph:
     """Build a directed graph from interaction records."""
     G = nx.DiGraph()
     edge_weights = defaultdict(int)
+    # Solo action types that don't represent agent-to-agent interactions
+    solo_types = {"work"}
     for interaction in interactions:
+        if interaction.get("type") in solo_types:
+            continue
         frm = interaction["from"]
         to = interaction["to"]
         if to == "all":

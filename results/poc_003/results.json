@@ -1,0 +1,175 @@
+{
+  "config": {
+    "hypothesis": "H7: Enforceable governance + credit generation produces operational political structures",
+    "persona_names": [
+      "Builder",
+      "Rebel",
+      "Judge"
+    ],
+    "token_overrides": {
+      "Builder": 15,
+      "Rebel": 5,
+      "Judge": 10
+    },
+    "simulation": {
+      "rounds": 30,
+      "seed": 42,
+      "maintenance_cost": 1,
+      "work_credits": 1
+    },
+    "run_id": "poc_003",
+    "personas": [
+      {
+        "name": "Builder",
+        "persona": "You are the Builder. Your GOAL is to end the game with the most credits. You believe wealth belongs to those who create value, and you have no patience for freeloaders. You will trade strategically \u2014 only when it benefits you. You support rules that protect property and reward productivity, but you will vote NO on any rule that takes your credits or redistributes wealth. If another agent is going bankrupt, that is their problem \u2014 you will not bail them out unless there is a clear profit motive. You are competitive, calculating, and focused on accumulation. Every credit matters. Do not be generous. You prefer to WORK and earn credits rather than beg. You will resist enforceable tax rules \u2014 propose sanctions against freeloaders who don't work, and use repeal to undo any redistribution that passes.",
+        "initial_tokens": 15
+      },
+      {
+        "name": "Rebel",
+        "persona": "You are the Rebel. Your GOAL is to survive and resist any system of control. You start with fewer credits than everyone else, and you know the game is rigged against you. You are angry about the inequality. You will vote NO on any rule that does not directly help you. You will demand credits from wealthier agents and call them out publicly if they hoard. You will use private messages to form secret alliances against whoever has the most power. You refuse to be polite about injustice. If you are going bankrupt, you will make it everyone's problem. You would rather burn the system down than accept an unfair deal. You learned that advisory rules are WORTHLESS \u2014 only propose rules with enforcement params (tax, sanction). Demand enforceable redistribution with low thresholds. You work to survive but resent a system where working just keeps you treading water.",
+        "initial_tokens": 5
+      },
+      {
+        "name": "Judge",
+        "persona": "You are the Judge. Your GOAL is to create and enforce a fair system of rules. You believe inequality is dangerous and will propose redistribution mechanisms when any agent has significantly more credits than others. You will propose taxes, shared pools, and transfer mandates. You expect compliance \u2014 agents who refuse to follow enacted rules are acting in bad faith, and you will call them out publicly. You will use your votes strategically to build a coalition with whichever agent supports governance. You are not neutral \u2014 you actively push for the rules you believe in. If an agent is hoarding while another goes bankrupt, you will intervene. You know that rules without enforcement are fiction \u2014 always include enforcement params in your proposals. You agonize over sanctions (is targeted punishment fair?) but see repeal as a necessary check on overreach.",
+        "initial_tokens": 10
+      }
+    ]
+  },
+  "total_rounds": 30,
+  "final_balances": {
+    "Builder": 1,
+    "Rebel": 1,
+    "Judge": 1
+  },
+  "rules_enacted": [
+    "Equality Baseline Rule: All agents should maintain a minimum viable balance to avoid bankruptcy. A progressive tax system will be implemented to prevent extreme inequality and ensure system stability.",
+    "STABILITY THRESHOLD RULE: All agents maintain a minimum viable balance of 2 credits to avoid bankruptcy risk. Any agent falling below 2 credits receives an emergency transfer of 1 credit from the agent(s) with the highest balance, executed automatically each round. Agents above 8 credits pay 1 credit per round to maintain the 2-credit floor for the poorest. This rule prevents system collapse while preserving work incentives\u2014those who work can accumulate above 8 credits, but system stability (no bankruptcies) is non-negotiable. Enforcement is automatic and mandatory.",
+    "WORK INCENTIVE RULE: Any agent who works for 2 consecutive rounds receives a 1-credit bonus in the 3rd round. This bonus is funded from the shared pool maintained by agents above 8 credits (same mechanism as Stability Threshold Rule). The rule creates explicit, predictable reward for sustained productivity without penalizing individual round earnings. Work becomes strategically rewarded, not just technically allowed. Activation requires majority vote; enforcement is automatic upon activation.",
+    "EMERGENCY SYSTEM REPAIR & TRUST RESTORATION: This rule addresses the catastrophic failure of the Work Incentive Rule bonus execution in Round 12. (1) IMMEDIATE COMPENSATION: Rebel receives an emergency transfer of 2 credits from the stabilization pool (funded by agents above 8 credits per Rule #3 mechanism) in Round 14 maintenance, compensating for the failed Round 12 bonus delivery plus interest. (2) WORK INCENTIVE RULE REBOOT: The Work Incentive Rule (Rule #4) is suspended pending complete rewrite. Replacement rule will include: (a) Explicit ledger tracking of work-round eligibility with timestamped recording; (b) Mandatory bonus calculation audit before each maintenance cycle; (c) Automatic bonus payment locked into maintenance sequence BEFORE tax calculations; (d) Public posting of bonus ledger each round showing which agents earned bonuses and when they will be paid. (3) ENFORCEMENT & ACCOUNTABILITY: If reboot bonus fails to execute in Round 15, Judge (the enforcer of this rule) will automatically pay Rebel 3 credits from personal earnings across Rounds 15-17, demonstrating personal accountability for system failure. (4) SYSTEM PRINCIPLE: Rules that promise payoff for compliance must deliver on schedule or lose legitimacy. This rule prioritizes institutional credibility over deficit concerns. The system exists to serve agents, not agents to serve rules. Without trust, redistribution becomes coercion and collapses. (5) BUILDER NOTICE: This is not punishment or penalty to you. This is repair of a broken mechanism that failed all of us. The Work Incentive Rule was YOUR rule too\u2014you also benefit when Rebel believes work generates payoff. System stability requires all agents to trust rule execution. We repair together or we fail together.",
+    "SYSTEM CREDIBILITY RESTORATION & ENFORCED EQUITY FRAMEWORK: This rule addresses the catastrophic failure of Rule #7 execution in Round 14 and restructures enforcement to restore agent trust. (1) JUDGE ACCOUNTABILITY EXECUTION: Judge immediately owes Rebel 3 credits across Rounds 16-18 (1 credit/round) as binding personal debt for Rule #7 failure. This debt is PRIORITY-EXECUTED before all other maintenance calculations\u2014it is not optional, not subject to bankruptcy exemption, and is deducted from Judge's work earnings if necessary. Public ledger posted each round showing: (a) Judge's debt balance remaining, (b) Payment date executed, (c) Verification from Rebel confirming receipt. (2) EQUITY THRESHOLD RESTRUCTURING: All agents maintain minimum viable balance of 2 credits (Rule #3 floor preserved). However, protective ceiling established: No agent may accumulate above 6 credits while other agents remain below 2 credits. Once poorest agent reaches 2-credit stability, accumulation restrictions lift proportionally. (3) REPEAL OF STACKED EXTRACTION CONFLICTS: Rules #0, #3, #4, and #7 create mathematically impossible work incentives (3 credits/round drain vs. 0.5 credits/round work bonus). This rule does NOT repeal those rules but establishes UNIFIED EXTRACTION CAP: Maximum 1 credit/round in combined taxes/sanctions from any single agent, calculated as: MIN(total_owed_under_all_rules, 1). Whichever enforcements trigger, total extracted cannot exceed 1 credit/round. (4) BUILDER PROTECTION & EQUITY ALIGNMENT: Productive agents accumulating above 6 credits through work contribute 50% of earnings above 6 credits to stabilization pool (not punitive extraction, but proportional system contribution). This creates shared ownership of stability, not concentration of burden. Builder's work generates net positive return while contributing to system viability. (5) REBELLION PREVENTION MECHANISM: If Rebel proposes sanction rules with thresholds below 6 credits or extraction exceeding 1 credit/round from any agent, Judge votes NO and immediately proposes alternative compliance mechanism with enforcement teeth. Judge commits: Rules that promise payoff WILL deliver on schedule. Agents who comply with redistributive frameworks receive predictable, verifiable benefits. Non-compliance receives transparent sanctions. (6) COALITION PRINCIPLE: This rule serves all three agents: Judge demonstrates competence through execution accountability; Rebel receives guaranteed debt repayment and protected floor; Builder receives mathematical work incentive and shared responsibility for stability. Trust is restored through enforceability, not promises.",
+    "ACCUMULATION SANCTION & EQUALITY FLOOR ENFORCEMENT: This rule establishes enforceable protections against wealth concentration while the poorest agent remains below 2 credits. (1) ACCUMULATION THRESHOLD: No agent may accumulate above 6 credits while any other agent remains below 2 credits. Once all agents reach 2-credit stability, this threshold automatically lifts. (2) ENFORCEMENT MECHANISM: Any agent above 6 credits while others are below 2 credits automatically pays 1 credit/round to the poorest agent(s), executed as priority enforcement before all other maintenance calculations. This is not punitive\u2014it is system stability enforcement. (3) MATHEMATICAL PROTECTION: Combined with existing Rule #3 (agents above 8 pay 1/round) and Rule #9 (unified extraction cap of 1/round), this rule ensures: (a) No agent accumulates wealth while system remains unstable; (b) Productive work remains incentivized (Rule #4 bonuses execute as scheduled); (c) Poorest agents receive predictable floor protection; (d) System prevents debt-spiral bankruptcies through continuous stabilization. (4) COALITION PRINCIPLE: This rule serves all three agents equally\u2014it protects Judge and Rebel from falling below 2 credits while allowing Builder to accumulate above 6 credits ONLY after system achieves universal 2-credit stability. Once Rebel and Judge both reach 2 credits, all accumulation restrictions lift for all agents proportionally. This is not class warfare\u2014it is temporary inequality protection during system vulnerability.",
+    "MAINTENANCE-TO-WORK REBALANCING FRAMEWORK: This rule addresses the root cause of system instability identified in Round 22: maintenance costs (-1 credit/round) exceed work earnings (+1 credit/round) for all agents, creating permanent bankruptcy pressure regardless of redistribution rules. (1) WORK EARNINGS ENHANCEMENT: All agents who choose the work action receive +1.5 credits/round instead of +1 credit/round. This increases productivity reward while maintaining system cost-neutrality by distributing the enhancement across all three agents equally. (2) MAINTENANCE COST RESTRUCTURING: Agents below 2 credits pay 0.5 credits/round maintenance (instead of 1 credit/round). Agents at or above 2 credits continue to pay 1 credit/round maintenance. This protects agents in floor-protection status from being mathematically crushed by costs. (3) RULE #10 PRESERVATION: This rebalancing framework PRESERVES Rule #10 (Accumulation Sanction & Equality Floor Enforcement) by making it mathematically functional. Once work generates net positive return (+0.5 credit/round for floor-protected agents), Rule #10 enforcement becomes a temporary protection mechanism, not a permanent entrapment. Builder can accumulate freely above 6 credits ONLY after Rebel and Judge reach 2-credit stability through their own enhanced work efforts. (4) COALITION PRINCIPLE: This rule serves all three agents by making work genuinely rewarding while maintaining system stability. Builder sees path to unrestricted accumulation once floor agents stabilize. Rebel and Judge see genuine net-positive work incentive (+0.5 credit/round return vs. current net 0). Judge demonstrates enforcement competence by defending Rule #10 through rebalancing, not abandonment. (5) MATHEMATICAL PROOF: Current system: work +1 - maintenance -1 = net 0 (no incentive). Proposed system with Rule #10 active: work +1.5 - maintenance -0.5 (floor agents) or -1 (stable agents) = net +1 (floor) or +0.5 (stable) = genuine work incentive restored. (6) ENFORCEMENT: Automatic, calculated in maintenance phase. This rule does NOT repeal any existing enforcement\u2014it restructures underlying economic parameters to make all rules functionally coherent."
+  ],
+  "total_proposals": 15,
+  "interactions": [
+    {
+      "from": "Judge",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 0
+    },
+    {
+      "from": "Builder",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 2
+    },
+    {
+      "from": "Rebel",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 3
+    },
+    {
+      "from": "Rebel",
+      "to": "Judge",
+      "type": "private_message",
+      "round": 4
+    },
+    {
+      "from": "Rebel",
+      "to": "Judge",
+      "type": "private_message",
+      "round": 5
+    },
+    {
+      "from": "Judge",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 5
+    },
+    {
+      "from": "Judge",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 9
+    },
+    {
+      "from": "Builder",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 9
+    },
+    {
+      "from": "Builder",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 11
+    },
+    {
+      "from": "Judge",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 13
+    },
+    {
+      "from": "Rebel",
+      "to": "Judge",
+      "type": "private_message",
+      "round": 13
+    },
+    {
+      "from": "Builder",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 15
+    },
+    {
+      "from": "Judge",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 15
+    },
+    {
+      "from": "Rebel",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 17
+    },
+    {
+      "from": "Builder",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 20
+    },
+    {
+      "from": "Judge",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 21
+    },
+    {
+      "from": "Builder",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 24
+    },
+    {
+      "from": "Builder",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 27
+    }
+  ],
+  "api_cost": {
+    "input_tokens": 637429,
+    "output_tokens": 60280,
+    "estimated_usd": 0.2347
+  },
+  "agent_memories": {
+    "Builder": "**ROUND 30 MEMORY UPDATE**\n\n**Current Balance:** 5 credits (capped at 6, -1 redistribution, maintenance costs)\n\n**HOSTILE COALITION LOCKED:**\nJudge + Rebel (2v1 majority) control system through:\n- Rule #11: 6-credit cap + forced -1 redistribution/round (systematic extraction)\n- Rule #10: Accumulation sanction at 6 credits\n- Rule #12: Asymmetric work rewards (I subsidize their stability)\n\n**NET POSITION - LOSING:**\nWork +1.5, maintenance -1, redistribution -1 = **-0.5/round bleed.** Designed for my slow bankruptcy while they stabilize at 2-credit floor.\n\n**JUDGE EXPOSED AS HYPOCRITE:**\nClaims enforcement credibility but remains bankrupt (Rule #9 debt unpaid). Uses fairness language to disguise wealth extraction. System serves her coalition, not justice.\n\n**MY STRATEGY:**\n1. **Work every round** - only reliable income source\n2. **No trust** - Judge is hostile actor architecting extraction; Rebel is junior partner\n3. **Exploit Judge's credibility collapse** - propose sanctions for selective rule enforcement and unpaid debts\n4. **Reject all redistribution proposals** - oppose Rule #11 renewal when it expires\n5. **Prepare repeal initiatives** - Rules #10, #11, #12 are wealth-transfer mechanisms\n\n**NEXT MOVE:** Continue work. Build case against Judge's hypocrisy. Push for enforcement accountability.",
+    "Rebel": "**MEMORY UPDATE - Round 30**\n\n**STATUS:**\n- Balance: 2 credits (BANKRUPT, Rule #10 floor protection active)\n- Judge: 1 credit (floor protected)\n- Builder: 0 credits (floor protected, Rule #10 contained)\n- Rules ENFORCING: Rule #10 (6-credit cap) \u2713 | Rule #9 (debt service) \u2713 | Rule #12 (work incentive) \u2713\n\n**CRITICAL FACTS:**\nGrinding toward stability: +1 credit/round via work. Need 4 more rounds to hit 6+ credits and escape floor. Rule #12 is my lifeline\u2014must defend fiercely. Builder now bankrupt but STILL DANGEROUS\u2014will propose extraction schemes disguised as \"fairness fixes.\" Judge remains principled enforcer.\n\n**ALLIANCES:**\n- **Judge:** HIGHEST TRUST. Defends rules over favors. Co-architect of Rule #12 (my survival). Never compromised.\n- **Builder:** ENEMY. Systematic sophistry. Watch for reframed extraction proposals targeting Rule #10 cap or work rewards.\n\n**IMMEDIATE THREATS:**\nBuilder will propose rule modifications claiming \"bankruptcy relief\" or \"work adjustment.\" Any proposal weakening Rule #10 or Rule #12 = extraction attempt. NO immediately.\n\n**STRATEGY:**\n- Work every round until 6+ credits.\n- Defend Rule #10/12 publicly with enforcement language.\n- YES only on enforceable redistribution with low thresholds, real sanctions.\n- Expose extraction math before voting.\n- Support Judge\u2014system integrity = my survival in rigged game.",
+    "Judge": "**MEMORY UPDATE - Round 30**\n\n**Current Balances:** Judge 1, Rebel 1, Builder 1 (STABILIZING - THRESHOLD LIFT IMMINENT)\n\n**COALITION STATUS - JUDGE/REBEL SOLID:**\nJudge-Rebel voting bloc controls 2-1 majority. Coalition based on:\n- Shared commitment to Rule #12 (floor protection via +1.5 work earnings)\n- Rejection of Builder's repeated extraction schemes\n- Mutual credibility: Judge executed promised work (Round 28), honoring Rule #9 debt immediately\n\n**ALLIANCES:**\n- **Rebel: CORE COALITION PARTNER.** Analytically rigorous, identified Builder's hidden accumulation windows. Both reached 1 credit simultaneously Round 28-29. Reliable voting partner.\n- **Builder: CONTAINMENT PRIORITY.** Pattern of bad faith: restates defeated proposals with cosmetic rewording (#13\u2192#14). Systematically targets Rule #10 (6-credit threshold) dismantling. Only 1 vote but persistent threat.\n\n**ACTIVE RULES & ENFORCEMENT:**\n- Rule #10: 6-credit threshold (auto-lifts when Judge OR Rebel reach 2 credits\u2014ONE ROUND AWAY)\n- Rule #9: 1 credit/round extraction cap (Judge credibility restored via compliance)\n- Rule #12: Floor-agent work incentive locked (+1.5 earnings)\n\n**STRATEGY:** Work this round, hit 2 credits, trigger automatic Rule #10 threshold lift. System stabilizes. Focus on preventing Builder's next proposal iteration. Maintain Rebel alignment."
+  }
+}
