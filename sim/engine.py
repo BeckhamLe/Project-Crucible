@@ -141,7 +141,8 @@ def run_simulation(config: dict, output_dir: str) -> dict:
             tokens=agent_cfg["initial_tokens"],
         ))
 
-    env = Environment(agents=agents)
+    maintenance_cost = config["simulation"].get("maintenance_cost", 0)
+    env = Environment(agents=agents, maintenance_cost=maintenance_cost)
     num_rounds = config["simulation"]["rounds"]
     total_usage = {"input_tokens": 0, "output_tokens": 0}
     round_snapshots = []
@@ -155,6 +156,16 @@ def run_simulation(config: dict, output_dir: str) -> dict:
 
         round_log = []
         for agent in order:
+            # Apply maintenance cost at start of turn
+            if maintenance_cost > 0:
+                agent.tokens = max(0, agent.tokens - maintenance_cost)
+                env.public_log.append({
+                    "round": round_num,
+                    "agent": "SYSTEM",
+                    "action": {"action": "maintenance_cost"},
+                    "summary": f"[MAINTENANCE] {agent.name} paid {maintenance_cost} credits (balance: {agent.tokens}{'  — BANKRUPT' if agent.tokens == 0 else ''})",
+                })
+
             log_entry, usage = agent_turn(agent, env)
             round_log.append(log_entry)
             total_usage["input_tokens"] += usage["input_tokens"]
