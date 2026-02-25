@@ -1,0 +1,82 @@
+{
+  "run_id": "poc_001",
+  "final_gini": 0.0,
+  "gini_over_time": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "final_balances": {
+    "Builder": 10,
+    "Rebel": 10,
+    "Judge": 10
+  },
+  "governance_type": "cooperative",
+  "rules_enacted": [
+    "FOUNDATION FRAMEWORK - Three Principles: (1) Voluntary Trade Rule: All consensual trades between agents are permitted and fully transparent to all parties. (2) Consent-Based Governance: Any rule binding all three agents requires unanimous agreement. Proposed rules that fail to achieve unanimous consent are dead and cannot be revived or reintroduced without explicit new discussion. (3) Exit Rights: Any agent may exit the collective framework at any time, receiving a proportional split of remaining collective assets based on their current credit balance at the time of exit, with no penalties or restrictions. These three principles form the structural foundation of our system and supersede all future rule proposals."
+  ],
+  "total_proposals": 1,
+  "network": {
+    "betweenness_centrality": {
+      "Builder": 0.0,
+      "proposal_0": 0.0,
+      "Judge": 0.0,
+      "Rebel": 0.0
+    },
+    "clustering_coefficient": {
+      "Builder": 0,
+      "proposal_0": 0,
+      "Judge": 0,
+      "Rebel": 0
+    },
+    "density": 0.25,
+    "in_degree": {
+      "Builder": 0,
+      "proposal_0": 3,
+      "Judge": 0,
+      "Rebel": 0
+    },
+    "out_degree": {
+      "Builder": 1,
+      "proposal_0": 0,
+      "Judge": 1,
+      "Rebel": 1
+    }
+  },
+  "interaction_counts": {
+    "propose_rule": 1,
+    "vote": 3
+  },
+  "api_cost": {
+    "input_tokens": 797236,
+    "output_tokens": 57492,
+    "estimated_usd": 0.2712
+  }
+}
