@@ -31,3 +31,8 @@
 - **Added after**: poc_002 — all three agents realized the system can't execute its own rules
 - **Test**: Observe whether agents distinguish between "rule passed" and "rule enforced" in future runs
 - **Status**: Observed in poc_002 (not formally tested) — Rebel demanded "execution-first governance," Judge admitted "the difference between a rule and fiction is execution," Builder called the framework "mechanical theater"
+
+## H7: Enforceable governance + credit generation produces operational political structures
+- **Prediction**: When governance has enforcement power (tax, sanction, repeal) and agents can generate wealth (work action), political structures become operational — not just rhetorical. At least one enforceable rule passes and executes, economic activity increases vs poc_002, and agents adapt behavior in response to enforcement.
+- **Test**: poc_003 — maintenance_cost=1, work_credits=1, free voting, enforceable rule types (tax/sanction/repeal), 30 rounds, same wealth tiers (15/5/10)
+- **Status**: PARTIALLY CONFIRMED (poc_003) — Enforceable tax rules passed and executed mechanically (credits actually moved rounds 2-7). But enforcement became inert by mid-game as economy bled below all thresholds. Governance was operational but couldn't save a shrinking economy. Coalition capture (Judge+Rebel 2v1) was stable and immediate. No sanctions used, no trades, no free voting adoption.

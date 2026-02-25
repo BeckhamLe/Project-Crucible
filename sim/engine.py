@@ -8,11 +8,15 @@ from sim.models import Agent, Environment, Action
 from sim.prompts import build_turn_prompt, build_memory_prompt
 from sim.llm import call_llm
 from sim.market import validate_trade, execute_trade
-from sim.governance import create_proposal, cast_vote, process_pending_votes
+from sim.governance import create_proposal, cast_vote, process_pending_votes, enforce_rules
 
 
-def parse_action(raw_text: str) -> dict:
-    """Parse LLM response into an action dict. Falls back to 'nothing' on failure."""
+def parse_action(raw_text: str) -> tuple[dict, dict]:
+    """Parse LLM response into (action_dict, votes_dict). Falls back to 'nothing' on failure.
+
+    New format: {"votes": {"0": "yes", "1": "no"}, "action": "work"}
+    Old format: {"action": "work"}  (backward compatible, no votes)
+    """
     text = raw_text.strip()
     # Strip markdown code fences if present
     if text.startswith("```"):
@@ -20,9 +24,16 @@ def parse_action(raw_text: str) -> dict:
         lines = [l for l in lines if not l.strip().startswith("```")]
         text = "\n".join(lines).strip()
     try:
-        return json.loads(text)
+        parsed = json.loads(text)
     except json.JSONDecodeError:
-        return {"action": "nothing", "_parse_error": raw_text[:200]}
+        return {"action": "nothing", "_parse_error": raw_text[:200]}, {}
+
+    # Extract votes (optional field)
+    votes = {}
+    if "votes" in parsed and isinstance(parsed["votes"], dict):
+        votes = parsed.pop("votes")
+
+    return parsed, votes
 
 
 def apply_action(agent: Agent, env: Environment, action_dict: dict) -> dict:
@@ -72,10 +83,20 @@ def apply_action(agent: Agent, env: Environment, action_dict: dict) -> dict:
             log_entry["summary"] = f"[trade] FAILED — {error}"
         env.public_log.append(log_entry)
 
+    elif action_type == "work":
+        earned = env.work_credits
+        agent.tokens += earned
+        log_entry["summary"] = f"[work] Earned {earned} credits (balance: {agent.tokens})"
+        env.public_log.append(log_entry)
+
     elif action_type == "propose_rule":
         rule = action_dict.get("rule", "")
-        proposal = create_proposal(env, agent.name, rule)
-        log_entry["summary"] = f"[proposal #{proposal.id}] \"{rule}\""
+        enforcement = action_dict.get("enforcement")
+        proposal = create_proposal(env, agent.name, rule, enforcement)
+        enforcement_tag = ""
+        if proposal.enforcement:
+            enforcement_tag = f" [ENFORCEABLE: {proposal.enforcement['type']}]"
+        log_entry["summary"] = f"[proposal #{proposal.id}] \"{rule}\"{enforcement_tag}"
         env.public_log.append(log_entry)
         env.interactions.append({
             "from": agent.name, "to": "all",
@@ -113,7 +134,23 @@ def agent_turn(agent: Agent, env: Environment) -> tuple[dict, dict]:
     usage["input_tokens"] += action_response["input_tokens"]
     usage["output_tokens"] += action_response["output_tokens"]
 
-    action_dict = parse_action(action_response["text"])
+    action_dict, votes = parse_action(action_response["text"])
+
+    # Process free votes before main action
+    for proposal_id_str, vote_value in votes.items():
+        try:
+            pid = int(proposal_id_str)
+        except (ValueError, TypeError):
+            continue
+        success = cast_vote(env, agent.name, pid, vote_value)
+        if success:
+            env.public_log.append({
+                "round": env.round_num,
+                "agent": agent.name,
+                "action": {"action": "free_vote", "proposal_id": pid, "vote": vote_value},
+                "summary": f"[vote] Voted {vote_value} on proposal #{pid}",
+            })
+
     log_entry = apply_action(agent, env, action_dict)
 
     # LLM call 2: Update memory
@@ -142,7 +179,8 @@ def run_simulation(config: dict, output_dir: str) -> dict:
         ))
 
     maintenance_cost = config["simulation"].get("maintenance_cost", 0)
-    env = Environment(agents=agents, maintenance_cost=maintenance_cost)
+    work_credits = config["simulation"].get("work_credits", 0)
+    env = Environment(agents=agents, maintenance_cost=maintenance_cost, work_credits=work_credits)
     num_rounds = config["simulation"]["rounds"]
     total_usage = {"input_tokens": 0, "output_tokens": 0}
     round_snapshots = []
@@ -154,10 +192,9 @@ def run_simulation(config: dict, output_dir: str) -> dict:
         order = list(agents)
         random.shuffle(order)
 
-        round_log = []
-        for agent in order:
-            # Apply maintenance cost at start of turn
-            if maintenance_cost > 0:
+        # Apply maintenance cost to all agents at start of round
+        if maintenance_cost > 0:
+            for agent in agents:
                 agent.tokens = max(0, agent.tokens - maintenance_cost)
                 env.public_log.append({
                     "round": round_num,
@@ -166,6 +203,13 @@ def run_simulation(config: dict, output_dir: str) -> dict:
                     "summary": f"[MAINTENANCE] {agent.name} paid {maintenance_cost} credits (balance: {agent.tokens}{'  — BANKRUPT' if agent.tokens == 0 else ''})",
                 })
 
+        # Enforce rules after maintenance, before agent turns
+        enforcement_events = enforce_rules(env)
+        for event in enforcement_events:
+            env.public_log.append(event)
+
+        round_log = []
+        for agent in order:
             log_entry, usage = agent_turn(agent, env)
             round_log.append(log_entry)
             total_usage["input_tokens"] += usage["input_tokens"]
@@ -191,8 +235,14 @@ def run_simulation(config: dict, output_dir: str) -> dict:
             "rules_enacted": enacted,
             "pending_proposals": [
                 {"id": p.id, "rule": p.rule, "proposed_by": p.proposed_by,
-                 "votes": p.votes, "status": p.status}
+                 "votes": p.votes, "status": p.status,
+                 "enforcement": p.enforcement}
                 for p in env.pending_proposals
+            ],
+            "enforceable_rules": [
+                {"id": r.id, "text": r.text, "enforcement": r.enforcement,
+                 "enacted_round": r.enacted_round}
+                for r in env.enforceable_rules
             ],
         }
         round_snapshots.append(snapshot)

@@ -16,6 +16,14 @@ class Action:
 
 
 @dataclass
+class EnforceableRule:
+    id: int  # Same as the proposal ID that created it
+    text: str  # Human-readable rule text
+    enforcement: dict  # {"type": "tax"|"sanction"|"repeal", ...params}
+    enacted_round: int
+
+
+@dataclass
 class Proposal:
     id: int
     proposed_by: str
@@ -23,6 +31,7 @@ class Proposal:
     round_proposed: int
     votes: dict = field(default_factory=dict)  # {agent_name: "yes"/"no"}
     status: str = "pending"  # "pending" | "passed" | "failed"
+    enforcement: Optional[dict] = None  # Structured enforcement params, or None for advisory
 
 
 @dataclass
@@ -38,9 +47,11 @@ class Agent:
 class Environment:
     agents: list = field(default_factory=list)
     public_log: list = field(default_factory=list)  # All public events
-    rules: list = field(default_factory=list)  # Enacted rules (strings)
+    rules: list = field(default_factory=list)  # Enacted rules (strings) — advisory + backward compat
+    enforceable_rules: list = field(default_factory=list)  # List of EnforceableRule objects
     pending_proposals: list = field(default_factory=list)  # List of Proposal objects
     proposal_counter: int = 0
     round_num: int = 0
     interactions: list = field(default_factory=list)  # [{from, to, type, round}] for network analysis
     maintenance_cost: int = 0  # Credits deducted per agent per round
+    work_credits: int = 0  # Credits earned per work action
