@@ -81,7 +81,7 @@ Project_Crucible/
 └── run.py               # CLI entry point
 ```
 
-**Stack:** Python, Anthropic API (Claude 3.5 Haiku), NetworkX, matplotlib, numpy
+**Stack:** Python, Anthropic API (Claude Haiku 4.5), NetworkX, matplotlib, numpy
 
 **Key design decision:** All agents run the same model. Personas come entirely from system prompts. This isolates ideology as the only variable — any behavioral differences between agents are caused by their instructions, not model variation.
 
@@ -132,7 +132,7 @@ The infrastructure is built. The experiments are what's left.
 
 ## Cost & Run Strategy
 
-All runs use Claude 3.5 Haiku ($1.00/1M input, $5.00/1M output).
+All runs use Claude Haiku 4.5 ($1.00/1M input, $5.00/1M output).
 
 | Phase | Agents | Rounds | Runs | Est. Cost |
 |---|---|---|---|---|
