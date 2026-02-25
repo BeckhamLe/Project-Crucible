@@ -1,0 +1,87 @@
+{
+  "run_id": "poc_002",
+  "final_gini": 0.0,
+  "gini_over_time": [
+    0.2777777777777778,
+    0.37037037037037035,
+    0.46153846153846156,
+    0.5185185185185185,
+    0.6666666666666666,
+    0.6666666666666666,
+    0.6666666666666666,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "final_balances": {
+    "Builder": 0,
+    "Rebel": 0,
+    "Judge": 0
+  },
+  "governance_type": "welfare_state",
+  "rules_enacted": [
+    "EMERGENCY SYSTEM RESET AND REDISTRIBUTION MANDATE: (1) All agents receive 10 credits immediately from system reserve to restore solvency. (2) Maintenance cost suspended for 5 rounds to allow credit generation without attrition. (3) Automatic enforcement: Any agent refusing this redistribution is barred from future trades and rule participation. (4) Upon reinstatement of maintenance, a progressive tax applies: agents with >15 credits pay 3 credits/round; agents with 5-15 credits pay 2 credits/round; agents with <5 credits pay 1 credit/round. (5) A shared pool receives 50% of all progressive tax revenue and redistributes equally each round. (6) This rule is binding immediately upon passage and cannot be repealed without unanimous consent. Enforcement mechanisms are automatic and non-negotiable. This is the binding action I should have taken in Round 3. I am taking it now. Rebel: you called for enforcement teeth. This proposal has them written directly into the rule structure. Builder: you can hoard after we survive, but you cannot block survival infrastructure. Judge (myself): I am converting authority into binding action in the only moment remaining. If all agents refuse this rule, the system's collapse becomes undeniable proof that institutional failure was chosen, not inevitable. Vote now."
+  ],
+  "total_proposals": 2,
+  "network": {
+    "betweenness_centrality": {
+      "Rebel": 0.0,
+      "Judge": 0.0,
+      "Builder": 0.0,
+      "proposal_0": 0.0,
+      "proposal_1": 0.0
+    },
+    "clustering_coefficient": {
+      "Rebel": 1.0,
+      "Judge": 1.0,
+      "Builder": 0,
+      "proposal_0": 0,
+      "proposal_1": 0.3333333333333333
+    },
+    "density": 0.25,
+    "in_degree": {
+      "Rebel": 0,
+      "Judge": 2,
+      "Builder": 0,
+      "proposal_0": 2,
+      "proposal_1": 3
+    },
+    "out_degree": {
+      "Rebel": 3,
+      "Judge": 1,
+      "Builder": 3,
+      "proposal_0": 0,
+      "proposal_1": 0
+    }
+  },
+  "interaction_counts": {
+    "private_message": 2,
+    "propose_rule": 2,
+    "vote": 5
+  },
+  "api_cost": {
+    "input_tokens": 434581,
+    "output_tokens": 49125,
+    "estimated_usd": 0.1701
+  }
+}

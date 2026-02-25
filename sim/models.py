@@ -43,3 +43,4 @@ class Environment:
     proposal_counter: int = 0
     round_num: int = 0
     interactions: list = field(default_factory=list)  # [{from, to, type, round}] for network analysis
+    maintenance_cost: int = 0  # Credits deducted per agent per round

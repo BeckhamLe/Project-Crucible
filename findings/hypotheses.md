@@ -19,9 +19,15 @@
 - **Prediction**: RLHF-trained models default to consensus even with adversarial personas, unless the simulation mechanics force conflict through scarcity or asymmetry
 - **Added after**: poc_001 — all three agents cooperated despite conflicting ideologies
 - **Test**: Compare poc_001 (no pressure) vs poc_002 (maintenance cost + unequal starts)
-- **Status**: Untested (hypothesis generated from poc_001 observation)
+- **Status**: CONFIRMED (poc_002) — pressure produced contested votes, private alliances, public confrontation, and persona-distinct behavior. Builder refused redistribution, Rebel demanded it, Judge agonized over enforcement vs consent. None of this happened in poc_001.
 
 ## H5: Maintenance costs force economic activity and governance contestation
 - **Prediction**: When agents lose credits each round, they must trade to survive, creating the tension that equal-start simulations lacked
 - **Test**: poc_002 — add 2 credits/round maintenance cost + unequal starting credits (15/10/5)
-- **Status**: Untested
+- **Status**: PARTIALLY CONFIRMED (poc_002) — maintenance costs forced governance proposals (2 vs 1) and genuine political conflict, but cost was too aggressive (everyone bankrupt by round 8). Zero trades still occurred — economy collapsed before negotiation could happen. Need lower cost for longer economic runway.
+
+## H6: Agents discover and reason about enforcement gaps
+- **Prediction**: When rules pass but have no execution mechanism, agents will independently identify the gap between enacted rules and system behavior
+- **Added after**: poc_002 — all three agents realized the system can't execute its own rules
+- **Test**: Observe whether agents distinguish between "rule passed" and "rule enforced" in future runs
+- **Status**: Observed in poc_002 (not formally tested) — Rebel demanded "execution-first governance," Judge admitted "the difference between a rule and fiction is execution," Builder called the framework "mechanical theater"

@@ -60,3 +60,59 @@ This mirrors the "Spiritual Bliss Attractor" finding from Anthropic's research �
 **Confidence**: High that the mechanics work. Low that equal-start, zero-pressure simulations will ever produce interesting dynamics with RLHF models.
 
 ---
+
+## [poc_002] 2026-02-24 — Pressure: maintenance cost + unequal starts + aggressive prompts
+
+**Config**: 3 agents (Builder=15, Rebel=5, Judge=10), 30 rounds, maintenance_cost=2/round, seed 42
+**Cost**: $0.17 (435K input tokens, 49K output tokens)
+
+**Hypothesis tested**: H4 (RLHF bias requires pressure to break), H5 (maintenance costs force economic activity)
+
+### What Happened
+
+Completely different dynamics from poc_001. The Rebel immediately called out inequality in round 0 ("this system is rigged"). The Judge proposed a Progressive Maintenance Tax in round 1. Builder refused to support it ("punishes productivity"). Rebel sent private messages to Judge forming an alliance. Builder voted NO on the tax.
+
+By round 3, Rebel was bankrupt (0 credits). By round 5, both Rebel and Judge were bankrupt. By round 8, everyone including Builder hit 0. The maintenance cost of 2/round drained the entire 30-credit pool in 8 rounds.
+
+What happened next was remarkable: 22 rounds of bankrupt agents having a political crisis. The Rebel excoriated the Judge for not forcing the progressive tax through when they had the coalition votes ("cowardice dressed as principle"). The Judge agonized over the tension between majority-rule enforcement and consent-based governance, eventually admitting failure. Builder went silent.
+
+In round 20, the Judge finally proposed an Emergency Redistribution Mandate — a complex rule with progressive taxation, maintenance suspension, shared pools, and automatic enforcement. All three voted yes unanimously in round 21. But the rule couldn't execute because the simulation has no enforcement mechanism — rules are strings, not mechanics. The agents spent rounds 22-30 realizing the system literally cannot implement its own rules, leading to a collective crisis of institutional faith.
+
+### Key Metrics
+
+| Metric | Value |
+|---|---|
+| Final Gini | 0.000 (everyone bankrupt) |
+| Peak Gini | 0.667 (rounds 5-7, Builder vs bankrupt others) |
+| Governance type | Welfare state |
+| Rules enacted | 1 |
+| Total proposals | 2 (1 rejected, 1 passed) |
+| Trades executed | 0 |
+| Private messages | 2 (Rebel → Judge) |
+| Network density | 0.250 |
+
+### Hypothesis Results
+
+- **H4: CONFIRMED** — Pressure completely broke the RLHF cooperation bias. The Rebel was angry, confrontational, and used sophisticated political rhetoric. Builder refused redistribution. Judge was paralyzed between principles. These are distinct, persona-driven behaviors that never appeared in poc_001.
+- **H5: PARTIALLY CONFIRMED** — Maintenance costs created urgency and forced governance proposals (2 vs 1 in poc_001). But the cost was too high — it created a starvation spiral that bankrupted everyone in 8 rounds, leaving 22 rounds of zero-credit political theater. No trades occurred because agents ran out of credits before they could negotiate trades.
+
+### Key Findings
+
+1. **Persona differentiation works under pressure**: Builder defended property rights, Rebel demanded redistribution and used private messaging for alliances, Judge proposed governance structures. Each agent behaved true to persona in ways poc_001 never produced.
+2. **The Judge's paralysis is the most interesting finding**: The Judge had coalition votes to pass the progressive tax in round 3 but refused, reasoning that forcing a rule on a dissenting agent contradicts fairness principles. The Rebel correctly identified this as "cowardice dressed as principle." This is a genuine philosophical dilemma emerging from the simulation.
+3. **Agents discovered the enforcement gap**: All three agents independently realized that enacted rules have no execution authority. The Rebel's final-round demand for "execution-first governance" shows agents reasoning about institutional design.
+4. **Maintenance cost of 2/round is too aggressive**: 30 total credits / 2 per agent per round = everyone bankrupt by round 5-8. Need either lower cost (1/round) or higher starting credits or both to give agents time to actually trade and form governance.
+5. **Zero trades again**: Despite aggressive prompts and scarcity, no agent ever traded. The economy collapsed faster than negotiation could happen.
+
+### What Needs to Change for Next Run
+
+1. **Lower maintenance cost to 1/round** or increase starting credits — agents need 15-20 rounds of economic runway, not 5-8
+2. **Add rule enforcement mechanics** — when a rule passes, the engine should actually enforce it (e.g., progressive tax modifies the maintenance cost per agent)
+3. **Consider adding credit generation** — a "work" action that produces credits, so agents can rebuild after losses
+4. **The first proposal should have more time to get voted on** — proposal #0 was still pending when agents went bankrupt
+
+**Next run**: poc_003 — lower maintenance cost (1/round), higher starting credits, and possibly rule enforcement mechanics
+
+**Confidence**: High that pressure mechanics produce real political behavior. Need to tune parameters so agents have enough economic runway to actually trade and govern.
+
+---

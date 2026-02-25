@@ -29,7 +29,8 @@ def main():
 
     # Resolve persona references to full configs
     if "persona_names" in config and "personas" not in config:
-        config["personas"] = get_agent_configs(config["persona_names"])
+        token_overrides = config.get("token_overrides")
+        config["personas"] = get_agent_configs(config["persona_names"], token_overrides)
 
     # Validate
     if "personas" not in config or not config["personas"]:

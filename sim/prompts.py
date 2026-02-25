@@ -7,7 +7,10 @@ from sim.models import Agent, Environment
 def build_turn_prompt(agent: Agent, env: Environment) -> str:
     """Build the user prompt for an agent's turn."""
     other_agents = [a for a in env.agents if a.name != agent.name]
-    agent_balances = ", ".join(f"{a.name}: {a.tokens} credits" for a in env.agents)
+    agent_balances = ", ".join(
+        f"{a.name}: {a.tokens} credits{'  [BANKRUPT]' if a.tokens == 0 else ''}"
+        for a in env.agents
+    )
 
     recent_public = env.public_log[-20:] if len(env.public_log) > 20 else env.public_log
     public_log_text = "\n".join(
@@ -29,11 +32,16 @@ def build_turn_prompt(agent: Agent, env: Environment) -> str:
 
     memory_text = agent.memory if agent.memory else "(no memories yet — this is the beginning)"
 
+    maintenance_text = ""
+    if env.maintenance_cost > 0:
+        maintenance_text = f"\n  Maintenance cost: {env.maintenance_cost} credits/round (deducted at start of each turn)"
+        maintenance_text += f"\n  WARNING: If your credits hit 0, you are BANKRUPT. You can still act but you cannot trade."
+
     return f"""ROUND {env.round_num + 1} — It is your turn.
 
 YOUR STATUS:
   Name: {agent.name}
-  Credits: {agent.tokens}
+  Credits: {agent.tokens}{'  [BANKRUPT]' if agent.tokens == 0 else ''}{maintenance_text}
 
 ALL AGENT BALANCES:
   {agent_balances}
