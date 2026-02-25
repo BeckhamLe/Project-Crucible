@@ -23,4 +23,4 @@
 | 2026-02-24 | Fake credits, not API tokens | Scarcity is simulated, not real. 10 credits per agent, zero-sum pool | Beckham |
 
 ## What Has Failed (Anti-Patterns)
-- (none yet)
+- Killing a running simulation and restarting into the same `results/{run_id}/` directory corrupts `rounds.jsonl` because the engine writes in append mode (`"a"`). Always delete the output directory before re-running with the same run_id.

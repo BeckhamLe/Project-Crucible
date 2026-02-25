@@ -1,20 +1,13 @@
 # Project Crucible — Active State
 
-## Current Phase: BUILD
+## Current Phase: PoC (iterating on experiment design)
 
-## Agent Assignments
-
-| Agent Slot     | Owner    | Owns                        | Status   |
-|----------------|----------|-----------------------------|----------|
-| sim_agent      | —        | sim/, run.py                | pending  |
-| analysis_agent | —        | analysis/                   | pending  |
-| config_agent   | Beckham  | configs/, findings/         | active   |
-
-## Active Run
-- None yet — building proof-of-concept
+## Completed Runs
+- **poc_001**: Baseline (equal credits, no pressure) → cooperative consensus, zero conflict
+- **poc_002**: Pressure (maintenance cost 2/round, unequal starts 15/5/10, aggressive prompts) → contested governance, political rhetoric, starvation spiral, enforcement gap discovery
 
 ## Queue
-1. Baseline PoC: 3 agents (Builder, Rebel, Judge), 30 rounds, 10 credits each
+- **poc_003**: Tuned pressure — lower maintenance cost, more economic runway, possibly rule enforcement mechanics
 
 ## Last Finding
-> No runs completed yet.
+> poc_002 confirmed that pressure breaks RLHF cooperation bias (H4). Maintenance cost was too aggressive — everyone bankrupt by round 8. Need to tune parameters for longer economic activity. Agents discovered the enforcement gap (rules are strings, not mechanics).
