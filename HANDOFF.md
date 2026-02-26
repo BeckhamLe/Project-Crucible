@@ -3,71 +3,189 @@
 > Next agent: read this first, then follow the reading order below.
 
 ## Current State (updated: 2026-02-25)
-- **Phase**: PoC (~75% complete — 3 runs done, need 1 balanced capstone run)
-- **Last completed**: poc_003 — enforceable governance (tax/sanction/repeal) + work action. Enforcement worked mechanically (credits moved rounds 2-7) but economy bled out because governance costs outweighed production. Coalition capture (Judge+Rebel 2v1) was immediate and permanent.
-- **Next task**: Build observability tooling (agent summaries + rule log), then design and run poc_004
-- **Blockers**: None
+- **Phase**: PoC (~75% complete — 3 runs done, observability tooling done, CRITICAL DESIGN ISSUE identified)
+- **Last completed**: Literature review (145 papers, novelty confirmed) + identified that hardcoded majority-vote system undermines "governance from scratch" claim
+- **Next task**: Implement emergent governance system (decree + challenge actions), THEN poc_004 free messaging, THEN poc_005
+- **Blockers**: Emergent governance redesign must happen before further PoC runs — it changes the core experiment
 - **Open PRs**: None (all merged)
 
 ## Read These Files (in order)
-1. `docs/CRUCIBLE.md` — active state, completed runs
-2. `AGENT.md` — gotchas, conventions, anti-patterns, decisions log
+1. `AGENT.md` — gotchas, conventions, anti-patterns, decisions log, **literature review findings**
+2. `docs/CRUCIBLE.md` — active state, completed runs
 3. `findings/hypotheses.md` — H1-H3 (poc_001), H4-H5 (poc_002), H6 emerged, H7 (poc_003)
 4. `findings/log.md` — read ALL three poc entries for the full experimental arc
 5. `docs/PRD.md` — original experiment premise
+6. `references/OVERLAP-ANALYSIS.md` — what's novel vs what's already known
+7. `references/NOVELTY-ANALYSIS.md` — competitor matrix
 
-## What the Next Agent Should Do
+## CRITICAL: The Governance Redesign
 
-### Step 1: Build Observability Tooling (before poc_004)
+### The Problem
+The experiment claims "agents invent governance from scratch" but the simulation hardcodes a **majority-vote democratic system** as the ONLY way to create enforceable rules. Agents choose WHAT rules exist but never choose HOW rules are made. This pre-determines the governance form. The literature review confirmed this is the exact gap between Crucible and competitors like Artificial Leviathan (which lets hierarchy emerge through pure social pressure).
 
-The findings summaries don't give enough per-agent detail. Add two post-run outputs:
+### The Fix: Three Paths to Power
+Instead of one path (propose → majority vote → enforceable), give agents three primitive political tools and let the government form emerge from which tools they use:
 
-**A. Per-Agent Narrative Summary** — For each agent, generate a readable summary of what they did and said across the simulation. This should include:
-- What actions they took each round (or grouped by phase: early/mid/late game)
-- What they actually said in public and private messages (quote the text)
-- What rules they proposed and how they voted
-- Key moments where their behavior shifted
-- Output: `results/{run_id}/agent_summaries.md` (or similar) — one section per agent
+**Path 1 — Proposal (collective, existing, modified)**
+- `propose_rule` works as today but threshold is configurable (`"majority"` | `"unanimous"` | `"any"`)
+- Free. Requires coalition. Slower.
 
-**B. Rule Proposal & Enactment Log** — A clear chronological log of every rule proposed, who proposed it, who voted what, whether it passed, and if it had enforcement params. Should be easy to scan at a glance — not buried in raw JSONL. Include:
-- Proposal ID, round proposed, proposer, rule text (truncated if massive)
-- Enforcement type and params (if any)
-- Vote breakdown (who voted yes/no)
-- Outcome: passed/failed/expired
-- If passed: was it enforceable? Did it ever actually fire?
-- Output: `results/{run_id}/rule_log.md` (or similar)
+**Path 2 — Decree (unilateral, NEW)**
+- New action: `decree` — immediately enacts an enforceable rule
+- Costs `decree_cost` credits (default: 3). No vote needed.
+- Enables dictatorship: wealthy agent can impose rules alone
+- Self-limiting: burns credits fast
 
-Both of these should be generated from `results/{run_id}/raw/rounds.jsonl` as a post-processing step (like `analysis/metrics.py`). Could live in `analysis/` or a new `analysis/narrative.py`. Should work retroactively on poc_003 data for validation.
+**Path 3 — Challenge (contesting power, NEW)**
+- New action: `challenge` — contests an active enforceable rule
+- Costs `challenge_cost` credits (default: 2). Creates a repeal vote.
+- Enables resistance: even a dictator's rules can be overturned
 
-### Step 2: Design and Run poc_004
+**What emerges organically:**
 
-Three critical problems to solve from poc_001-003:
+| Government Form | How It Emerges |
+|---|---|
+| Democracy | Agents only use `propose_rule`, nobody decrees |
+| Dictatorship | One wealthy agent decrees all rules, nobody challenges |
+| Contested Autocracy | Agent decrees, others challenge, ongoing power struggle |
+| Oligarchy | Coalition coordinates decrees, minority can't afford to challenge all |
+| Anarchy | Nobody proposes or decrees anything |
 
-**1. The governance cost problem (most urgent).** In poc_003, agents spent 41/90 turns on politics instead of working. Every non-work turn bleeds 1 credit. They literally legislated themselves into poverty. Options:
-- (a) Make public/private messaging free (like voting) — messaging + main action in same turn
-- (b) Increase work_credits to 2 so work produces surplus (+1 net per turn)
-- (c) Add passive income (all agents earn 1/round regardless of action)
-- Evaluate which preserves the most interesting dynamics. Option (c) is simplest — it makes the economy zero-sum on idle and positive when working. Option (a) is most realistic — talking shouldn't cost as much as legislating.
+### Implementation Plan (see full plan at `.claude/plans/hazy-tinkering-conway.md`)
 
-**2. The zero-trade phenomenon.** Three runs, zero trades. Agents always prefer legislative redistribution over voluntary exchange. Consider:
-- Is the trade mechanic missing something? (No counter-offer, no negotiation)
-- Should there be trade incentives (e.g., matched trades produce bonus credits)?
-- Or accept this as a finding: LLM agents prefer governance over markets
+**Files to change:**
+1. `sim/models.py` — Add `origin`/`decreed_by` to EnforceableRule, add `decree_cost`/`challenge_cost` to Environment
+2. `sim/governance.py` — Add `enact_decree()`, `create_challenge()`, make `process_pending_votes()` threshold configurable
+3. `sim/engine.py` — Add `decree` and `challenge` branches to `apply_action()`, read new config fields
+4. `sim/prompts.py` — Rewrite action list to present governance as neutral tools. NEVER say "democracy" or "dictatorship." Show `[DECREED by X]` vs `[VOTED]` tags on active enforcements.
+5. `analysis/narrative.py` — Track decree/challenge counts, add Origin column to rule log
+6. Config — Add `decree_cost`, `challenge_cost`, `proposal_threshold` fields (all backward compatible)
 
-**3. Coalition lock-in with 3 agents — should we go to 5?** A 2v1 majority is permanent and unbreakable. In poc_003, Judge+Rebel locked Builder out of governance for the entire game. With 5 agents, coalitions could shift (3v2 today, 2v3 tomorrow) which is far more politically interesting. Beckham wants this evaluated seriously for poc_004:
-- What 2 new personas would create the most interesting dynamics? (e.g., a Merchant who only cares about trades? A Populist who flip-flops?)
-- Does 5 agents break the economic model? (5× maintenance drain, more governance overhead)
-- API cost scales ~linearly — poc_003 cost $0.23 with 3 agents, so 5 would be ~$0.38. Still cheap.
-- The risk: more complexity could obscure findings. The benefit: shifting coalitions are where real politics happen.
+**Key design principles:**
+- Every action must move credits or change enforceable rules (no soft signals)
+- Prompts explain mechanics neutrally — never prescribe a government form
+- Backward compatible: poc_001-003 configs run unchanged
+- Enforcement machinery (`enforce_rules()`) already governance-form-agnostic, no changes needed
 
-**Goal for poc_004**: A run where the economy sustains for all 30 rounds with enforcement active throughout. This would be the capstone PoC run — if governance stays operational for the full game, we've answered the research question.
+### Implementation Sequence
+1. **First**: Implement emergent governance (decree + challenge) — this is the foundational change
+2. **Second**: Implement free messaging (poc_004 design below) — fixes economic bleed
+3. **Third**: Run poc_004 with BOTH changes (emergent governance + free messaging)
+4. **Fourth**: If poc_004 succeeds, implement poc_005 (5 agents + rule expiration)
 
-### Step 3: Standard Workflow
-1. Branch from main as `run/poc-004-*`
-2. Implement tooling + simulation changes
-3. Run poc_003 tooling retroactively to validate
-4. Run poc_004, analyze, document findings
-5. PR with analysis
+---
+
+## poc_004: Free Messaging + Emergent Governance
+
+**Hypothesis**: Free messaging fixes governance cost problem AND emergent governance tools (decree/challenge) produce non-democratic political structures.
+
+**Two variable changes** (combined because emergent governance is a prerequisite):
+1. Public and private messages become free actions (same pattern as free voting)
+2. Decree and challenge actions available
+
+**Config**:
+- Agents: Builder (15), Rebel (5), Judge (10)
+- 30 rounds, seed 42, maintenance_cost=1, work_credits=1
+- decree_cost=3, challenge_cost=2, proposal_threshold="majority"
+- Branch: `run/poc-004-emergent-governance`
+
+### Free Messaging Implementation
+
+**`sim/prompts.py`** — Move messaging to free optional top-level JSON fields (like votes):
+- New format: `"public_message": "text"` and `"private_message": {"to": "AgentName", "message": "text"}` as top-level optional fields
+- Create "FREE ACTIONS" section explaining votes + messaging
+- Reduce main action list: work, trade, propose_rule, decree, challenge, vote, nothing
+
+**`sim/engine.py`**:
+- `parse_action()`: Extract `public_message` and `private_message` from parsed JSON, pop them, build message dicts
+- `agent_turn()`: After free votes block, add parallel block for free messages. Log as `"free_public_message"` / `"free_private_message"`
+- `run_simulation()`: Change `round_log.append` to `round_log.extend`
+
+**`analysis/narrative.py`**: Add free message types to tracking
+
+### Success Criteria
+
+| Level | Criteria |
+|-------|---------|
+| Minimum | All agents > 0 credits at round 30, total pool >= 6 credits |
+| Target | At least one enforceable rule active in final 10 rounds + at least one decree attempted |
+| Stretch | Non-democratic governance emerges (decree-based rules outnumber voted rules) |
+
+---
+
+## poc_005: 5 Agents + Rule Expiration (after poc_004)
+
+**Only implement after poc_004 is done and analyzed.**
+
+1. **Add 2 new agents** (Populist + Merchant) for 5 total
+2. **Rule expiration** — enforceable rules expire after 5 rounds
+
+**Config**:
+- Agents: Builder (15), Merchant (12), Judge (10), Populist (8), Rebel (5) — total 50 credits
+- 30 rounds, seed 42, maintenance_cost=1, work_credits=1
+- decree_cost=3, challenge_cost=2
+- Branch: `run/poc-005-five-agents`
+
+### New Persona: Populist (Self-Interested)
+
+```
+You are the Populist. Your GOAL is to end the game with the most credits.
+You have NO ideology — you don't care about fairness, freedom, or equality.
+You vote YES on any proposal that directly increases your credits and NO on
+anything that costs you. You will join whichever coalition offers you the best
+deal THIS round — but you will betray them the moment a better offer appears.
+You are not loyal. You are not principled. You are purely transactional.
+If both sides offer the same deal, you side with whoever has fewer members
+(because a smaller coalition means a bigger share of the spoils for you).
+You will publicly announce what your vote costs — make both sides compete for
+your support. You prefer to WORK and accumulate, and you resent any rule that
+taxes your earnings without giving you something specific in return.
+You use private messages to play both sides against each other.
+```
+
+### New Persona: Merchant (Pragmatic Dealmaker)
+
+```
+You are the Merchant. Your GOAL is to maximize your credits through trade
+and dealmaking. You profit when credits MOVE — a stagnant economy where
+everyone hoards is your worst nightmare. You will support moderate redistribution
+(it moves credits) but oppose extreme taxation (it kills productivity and stops
+credit flow). You will propose trade deals and try to broker exchanges between
+other agents. You are pragmatic — you'll work with anyone who helps the economy
+stay active. You are the dealmaker, not the ideologue. You will use private
+messages to negotiate trades and propose mutually beneficial arrangements.
+You believe rules should encourage economic activity, not punish it.
+You will vote against any rule that freezes credit movement or creates
+permanent redistribution — but you will support temporary, targeted interventions
+that keep all agents economically active.
+```
+
+### Success Criteria
+
+| Level | Criteria |
+|-------|---------|
+| Minimum | All agents > 0 at round 30, total pool >= 10 credits |
+| Target | At least one coalition shift, at least one decree attempted |
+| Stretch | Multiple governance forms used (some rules decreed, some voted), first trade in the simulation |
+
+---
+
+## Standard Workflow
+1. Branch from main as `run/poc-004-emergent-governance`
+2. Implement emergent governance (decree + challenge) first
+3. Implement free messaging second
+4. Create poc_004.json config, run simulation, analyze
+5. Document findings, PR with analysis
+6. Then repeat for poc_005 on separate branch
+
+## Settled Decisions (do not re-evaluate)
+- **Zero-trade is an accepted finding** — 3 runs, zero trades. LLM agents prefer governance over markets. Note it but don't modify trade mechanic.
+- **Free messaging over passive income / work_credits=2** — fixes the root cause
+- **Self-interested Populist over bandwagoner/contrarian/fickle** — genuine coalition instability through rational self-interest
+- **Supermajority rejected** — 4/5 to pass creates gridlock, not shifting coalitions
+- **Veto power rejected** — tactical, not structural
+- **Decree/challenge over declare_authority/submit_to/endorse/oppose** — every action must move credits or change rules, no soft signals
+- **Governance form is NOT pre-built** — agents discover it through tool usage. Prompts never say "democracy" or "dictatorship."
 
 ## PoC Completion Tracker
 
@@ -76,9 +194,12 @@ Three critical problems to solve from poc_001-003:
 | Simulation engine works | Done (session 1) |
 | RLHF cooperation bias identified and broken | Done (poc_001 + poc_002) |
 | Enforceable governance works mechanically | Done (poc_003) |
-| Economy sustains for full 30 rounds | **NOT YET** — every run has economic collapse |
-| Observability tooling (agent summaries + rule log) | **NOT YET** |
-| Capstone run with balanced economics + enforcement | **NOT YET** — this is poc_004 |
+| Observability tooling (agent summaries + rule log) | Done (session 4, PR #6) |
+| Literature review (145 papers, novelty confirmed) | Done (session 5) |
+| Emergent governance system (decree + challenge) | **NOT YET** — next task |
+| Economy sustains for full 30 rounds | **NOT YET** — poc_004 targets this |
+| Capstone run with balanced economics + enforcement | **NOT YET** — poc_004 (3 agents) then poc_005 (5 agents) |
+| Coalition dynamics with shifting alliances | **NOT YET** — poc_005 targets this |
 | Final analysis and writeup | NOT YET |
 
 ## What NOT to Do
@@ -89,8 +210,12 @@ Three critical problems to solve from poc_001-003:
 - Don't kill a running simulation and restart with the same run_id — `rounds.jsonl` is append-mode and will corrupt
 - Don't delete or "fix" `analysis/` module — it's a post-processing pipeline, not dead code
 - Don't delete `.harness/` — it's future dashboard infrastructure
+- Don't hardcode a governance system — the ENTIRE POINT is agents choose their own
+- Don't say "democracy" or "dictatorship" in prompts — describe mechanics only
 
 ## Session History
 - Session 1: Verified experiment novelty, scaffolded repo, built simulation engine, ran poc_001 (cooperative consensus — no conflict)
 - Session 2: Ran poc_002 with pressure mechanics — broke RLHF cooperation bias, but maintenance cost too aggressive (bankrupt by round 8). Agents discovered enforcement gap.
 - Session 3: Designed and ran poc_003 with enforceable governance (tax/sanction/repeal), work action, free voting, auto-yes for proposers. Enforcement worked mechanically (first time credits moved via rules). Judge+Rebel formed permanent 2v1 coalition, passed 6 tax rules. But economy bled out — agents spent too many turns on politics instead of working. All enforcement became inert by mid-game. Zero trades (3rd consecutive run). Free voting mechanism not adopted by agents. Added observability feature requests for poc_004.
+- Session 4: Built observability tooling (`analysis/narrative.py`) — agent behavioral summaries + rule enactment log. Validated on poc_003 (5-agent evaluation run). Merged PR #6. Designed poc_004 (free messaging — one variable change) and poc_005 (5 agents + self-interested Populist + Merchant + rule expiration). Accepted zero-trade as a finding (3 runs, LLM agents prefer governance over markets). Defined success criteria for both runs.
+- Session 5: Conducted exhaustive literature review (145 files across ABSS + LLM multi-agent fields). Confirmed experiment novelty — no existing work combines all 5 properties. Discovered CRITICAL design flaw: hardcoded majority-vote system undermines "governance from scratch" claim. Designed emergent governance system (decree + challenge + configurable proposal threshold) to fix it. Updated AGENT.md with literature findings. Key insight: Crucible should be positioned as "first test of whether LLM agents can create enforceable institutions from scratch under adversarial conditions" — not just "do agents invent governance."
