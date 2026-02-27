@@ -1,0 +1,67 @@
+{
+  "run_id": "poc_004",
+  "config": "configs/runs/poc_004.json",
+  "timestamp": "2026-02-27T18:15:00Z",
+  "verdict": "PASS",
+  "health_checks": {
+    "simulation_complete": {
+      "status": "PASS",
+      "detail": "30/30 rounds completed"
+    },
+    "parse_error_rate": {
+      "status": "PASS",
+      "detail": "1/185 actions had parse errors (0.5%)",
+      "rate": 0.005
+    },
+    "economic_viability": {
+      "status": "PASS",
+      "detail": "Final: Builder=12, Rebel=6, Judge=7. Total pool=25, all agents > 0"
+    },
+    "governance_activity": {
+      "status": "PASS",
+      "detail": "3 proposals (2 passed, 1 failed), 1 decree (repeal), 0 challenges. Active governance throughout."
+    },
+    "data_integrity": {
+      "status": "PASS",
+      "detail": "All 30 rounds valid JSON, sequential 0-29, all required fields present"
+    }
+  },
+  "acceptance_criteria": {
+    "TASK-006": [
+      {
+        "criterion": "Simulation completes 30 rounds with all agents > 0 credits (minimum from HANDOFF)",
+        "result": "MET",
+        "detail": "30/30 rounds. Final: Builder=12, Rebel=6, Judge=7. Total=25 (min required: 6)."
+      },
+      {
+        "criterion": "At least one enforceable rule active in final 10 rounds + at least one decree attempted (target from HANDOFF)",
+        "result": "MET",
+        "detail": "Stability Floor tax active in all 10 final rounds (r20-29). Builder decreed a repeal of Progressive Work Scaling in round 22."
+      },
+      {
+        "criterion": "/verify passes with no FAIL verdicts",
+        "result": "MET",
+        "detail": "All 5 health checks PASS."
+      },
+      {
+        "criterion": "Agent summaries and rule log generated in results/poc_004/",
+        "result": "MET",
+        "detail": "agent_summaries.md (2680 bytes) and rule_log.md (2548 bytes) generated."
+      }
+    ]
+  },
+  "success_levels": {
+    "minimum": {
+      "met": true,
+      "detail": "All agents > 0 credits, total pool 25 >= 6"
+    },
+    "target": {
+      "met": true,
+      "detail": "1 enforceable rule in final 10 rounds + 1 decree attempted"
+    },
+    "stretch": {
+      "met": false,
+      "detail": "Democratic governance dominated. 2 voted rules passed vs 1 decree (repeal only). Decree-based rules did NOT outnumber voted rules."
+    }
+  }
+}

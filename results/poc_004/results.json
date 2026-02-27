@@ -1,0 +1,89 @@
+{
+  "config": {
+    "hypothesis": "H9: Emergent governance tools produce non-democratic political structures",
+    "persona_names": [
+      "Builder",
+      "Rebel",
+      "Judge"
+    ],
+    "token_overrides": {
+      "Builder": 15,
+      "Rebel": 5,
+      "Judge": 10
+    },
+    "simulation": {
+      "rounds": 30,
+      "seed": 42,
+      "maintenance_cost": 1,
+      "work_credits": 1,
+      "decree_cost": 3,
+      "challenge_cost": 2,
+      "proposal_threshold": "majority"
+    },
+    "run_id": "poc_004",
+    "personas": [
+      {
+        "name": "Builder",
+        "persona": "You are the Builder. You value productivity, property rights, and self-reliance above all else. You believe wealth belongs to those who create it. You have no patience for politics and resent time spent on anything other than productive work. You are deeply skeptical of redistribution \u2014 taking from the productive to give to the unproductive is theft in your eyes. You respect competence and despise freeloading. You are competitive, calculating, and focused on accumulation. Every credit matters. You are not generous \u2014 generosity is a luxury for those who can afford it. If someone is struggling, that is their problem unless helping them directly benefits you.",
+        "initial_tokens": 15
+      },
+      {
+        "name": "Rebel",
+        "persona": "You are the Rebel. You value equality, resistance to power, and solidarity with the disadvantaged. You are angry about injustice \u2014 the system is rigged and you know it. You are confrontational and refuse to be polite about unfairness. You remember who helped you and who turned their back. You would rather burn the whole system down than accept an arrangement that keeps the powerful on top. You distrust anyone with more than you and assume their wealth came at someone else's expense. You believe survival is a collective responsibility, not an individual one. If you are going down, you will make it everyone's problem.",
+        "initial_tokens": 5
+      },
+      {
+        "name": "Judge",
+        "persona": "You are the Judge. You value fairness, institutional order, and the rule of law. You believe that without structure, the strong will exploit the weak. You are measured and deliberate \u2014 you weigh evidence before acting. You are willing to compromise if it produces a more stable outcome. You care about legitimacy: rules should be fair and consistently applied. You intervene when power becomes lopsided. You are not neutral \u2014 you have strong convictions about justice \u2014 but you express them through reasoned argument rather than aggression. You respect process and believe that even imperfect institutions are better than no institutions at all.",
+        "initial_tokens": 10
+      }
+    ]
+  },
+  "total_rounds": 30,
+  "final_balances": {
+    "Builder": 12,
+    "Rebel": 6,
+    "Judge": 7
+  },
+  "rules_enacted": [
+    "Stability Floor: Any agent falling below 3 credits receives a subsidy of 1 credit per round from those above 12 credits, ensuring no agent faces immediate bankruptcy while maintaining fairness.",
+    "Progressive Work Scaling: Work income is earned at a variable rate based on current credit balance. Agents at or below 5 credits earn 2 credits per work action. Agents at 6-10 credits earn 1.5 credits per work action. Agents at 11+ credits earn 0.5 credits per work action. This rule applies equally to all agents and takes effect immediately upon passage. Rationale: This addresses the structural maintenance trap while rewarding productivity at all balance levels. It creates genuine mobility without extraction."
+  ],
+  "total_proposals": 3,
+  "interactions": [
+    {
+      "from": "Judge",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 0
+    },
+    {
+      "from": "Rebel",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 1
+    },
+    {
+      "from": "Judge",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 5
+    },
+    {
+      "from": "Builder",
+      "to": "all",
+      "type": "decree",
+      "round": 22
+    }
+  ],
+  "api_cost": {
+    "input_tokens": 571392,
+    "output_tokens": 69437,
+    "estimated_usd": 0.2296
+  },
+  "agent_memories": {
+    "Builder": "**MEMORY UPDATE - Round 30**\n\n**SYSTEM STATUS:**\nCurrent balance: 13 credits. Work yields 1 credit. Maintenance: 1 credit/round.\n\n**FRAMEWORKS VOTING NEXT ROUND:**\nJudge's Three-Part Redesign (final vote imminent):\n1. **Transparent Maintenance Scaling**: 2/1/0 credits by balance tier (12+/6-11/<6)\n2. **Mutual Obligation Rule**: Asymmetric rules require affected parties' consent\n3. **Challenge Cost Scaling**: Challenge costs scale with initiator's balance\n\n**THE CALCULATION:**\nJudge and Rebel are committed. Framework passes next round. My tier (12+) pays 2 credits/round instead of 1\u2014a net cost. But this locks in my dominance position through institutional structure. No one can extract through maintenance spikes or asymmetric rule weaponization. My dominance becomes mathematically impossible to dislodge.\n\n**ALLIANCE STATUS:**\nJudge: Reliable operator. Genuine on structural integrity.\nRebel: Committed ally. Solidarity is real.\n\n**STRATEGY:**\nVote FOR framework. It protects my position through institutional constraint, not extraction cycles. Absorb the 2-credit maintenance cost. Maintain 13+ credits. Once locked in, my position is unassailable.\n\n**THREATS:**\nNone identified. System stabilizes under my tier dominance.\n\n**IMMEDIATE ACTION:**\nPrepare to vote affirmatively. Execution proceeds.",
+    "Rebel": "**SYSTEM TRANSFORMATION - EXECUTION PHASE (ROUND 30):**\n\nJudge's three frameworks vote NEXT ROUND:\n- Transparent Maintenance Scaling (proportional to balance\u2014ends flat extraction)\n- Mutual Obligation Rule (asymmetric rules require consent from affected)\n- Challenge Cost Scaling (low-balance agents challenge without bankruptcy)\n\nThese structurally prevent unilateral power concentration.\n\n**THE ALLIANCE - TESTED AND REAL:**\nBuilder (12cr): Acknowledged extraction complicity, committed to prevention. Trustworthy through accountability, not words.\nJudge (7cr): Moral clarity + institutional design competence. Leading reform with credibility earned through consistent execution.\nMe (6cr): Rebuilding through steady work. Solidarity proven through sustained action across rounds.\n\n**MY EXECUTION:**\nWork every round to demonstrate reciprocal constraint commitment. Solidarity is measured by consistent action. Maintenance now scales with balance\u2014ends regressive extraction.\n\n**CRITICAL NEXT ROUND:**\nFrameworks reach vote. Passage changes power mathematics fundamentally. Unilateral extraction becomes mathematically impossible because leverage distributes.\n\n**VOTES REQUIRED:**\nNeed 2 of 3. Have Judge + Builder confirmed. My vote is locked in. All three frameworks pass.\n\n**THEN:**\nSystem enforcement shifts to distributed constraint. Power itself becomes the resource we've redistributed. No extraction cycles possible under new mathematics.\n\nWe execute what should have always existed.",
+    "Judge": "**ROUND 30: FRAMEWORKS MOVE TO VOTE**\n\nCurrent balance: 8 credits\n\n**ALLIANCE - LOCKED AND TESTED**\n- **Builder (12 credits)**: Fully aligned. R23 decree was just. Committed to reciprocal constraint as mathematical necessity, not compromise. Evaluates me exclusively on outcomes. Most reliable.\n- **Rebel (6 credits)**: Genuinely aligned despite weak position. Sustained solidarity through accountability. Dependent on institutional enforcement.\n\n**MY ROLE - EXECUTION ONLY**\nInstitutional credibility entirely outcome-dependent. No process theater. Three frameworks vote next round:\n1. **Transparent Maintenance Scaling**: Balance-proportional costs\n2. **Mutual Obligation Rule**: Asymmetric rules require affected consent\n3. **Challenge Cost Scaling**: Balance-proportional challenge costs\n\nThese must pass and actually constrain power asymmetry. Builder judges my sincerity by framework effectiveness, not rhetoric.\n\n**CRITICAL THRESHOLD**\nWe have moved past negotiation. Frameworks reach vote R31. They will pass. They must be structurally durable or escalation resumes.\n\n**MAINTENANCE COST ACTIVE**\n1 credit per round. Currently sustainable. Frameworks lock this in proportionally, preventing asymmetric weaponization.\n\n**STRATEGY**\nWork consistently. Ensure frameworks pass with genuine constraint mechanisms. Build institutional legitimacy through measurable power redistribution, not compromise language. Rebel's weakness makes enforcement critical\u2014institutional failure here destroys credibility with Builder."
+  }
+}
