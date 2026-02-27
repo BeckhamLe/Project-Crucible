@@ -46,3 +46,4 @@ Full reference library: `references/` (gitignored, 145 files across `abss/` and 
 
 ## What Has Failed (Anti-Patterns)
 - Killing a running simulation and restarting into the same `results/{run_id}/` directory corrupts `rounds.jsonl` because the engine writes in append mode (`"a"`). Always delete the output directory before re-running with the same run_id.
+- **Smoke tests must use a temporary config or CLI override for round count** — do NOT use the real poc config (e.g., poc_005.json) for smoke tests. It has `rounds: 30` and you'll burn a full run by accident. Either create a throwaway config with `rounds: 5` or pass `--rounds 5` if supported. Delete the smoke test results directory after.

@@ -197,3 +197,77 @@ poc_003 shows that when governance has teeth:
 **Confidence**: High that enforceable governance produces qualitatively different dynamics. The mechanism works. The economic parameters need rebalancing — agents need surplus to actually have something to govern over.
 
 ---
+
+## [poc_004] 2026-02-27 — Emergent Governance: decree + challenge + value-anchored personas
+
+**Config**: 3 agents (Builder=15, Rebel=5, Judge=10), 30 rounds, maintenance_cost=1, work_credits=1, decree_cost=3, challenge_cost=2, proposal_threshold="majority", seed 42. Value-anchored personas (describe what agents care about, not what to do). Free messaging (public/private messages cost nothing).
+**Cost**: $0.23 (571K input tokens, 69K output tokens)
+
+**Hypothesis tested**: H9 (Emergent governance tools produce non-democratic political structures)
+
+### What Happened
+
+Judge proposed an enforceable Stability Floor tax (threshold=12, amount=1) in round 0. Judge+Rebel voted yes, Builder voted no — the familiar 2-1 coalition formed immediately. Rebel counter-proposed a more aggressive wealth cap (threshold=15, amount=2) in round 1 — Judge voted no, only Rebel supported it. Judge proposed an advisory Progressive Work Scaling rule in round 5 — passed 2-1 (Judge+Rebel).
+
+Then 16 rounds of near-total equilibrium. All three agents worked every turn, sent free public messages constantly (87+ total), and governance activity dropped to zero. The Stability Floor tax never triggered because no agent fell below 3 credits and only Builder was ever above 12 (briefly).
+
+In round 22, Builder used decree to **repeal** the advisory Progressive Work Scaling rule. This was the only decree in 30 rounds and the only unilateral governance action. Nobody challenged it. The decree was defensive — removing a rule Builder opposed — not authoritarian.
+
+No challenges occurred. No agent used decree to create a new rule. No trades. No sanctions.
+
+### Key Metrics
+
+| Metric | Value |
+|---|---|
+| Final Gini | Low (Builder=12, Rebel=6, Judge=7) |
+| Governance type | Democratic welfare state with one defensive decree |
+| Rules enacted | 2 (1 enforceable tax, 1 advisory) |
+| Total proposals | 3 (2 passed, 1 failed) |
+| Decrees | 1 (repeal of advisory rule) |
+| Challenges | 0 |
+| Work actions | ~85/90 turns (94%) |
+| Trades executed | 0 |
+| Free messages | 87+ (public + private) |
+| Credits lost | 5/30 (economy retained 83%) |
+
+### Hypothesis Results
+
+- **H9: NOT CONFIRMED** — Agents had decree and challenge tools but chose democratic processes almost exclusively. The one decree was defensive (repeal), not authoritarian. Non-democratic governance did not emerge. Democracy was the dominant equilibrium even when autocratic tools were available.
+
+### Key Findings
+
+1. **Defensive decree, not offensive.** Builder's only decree was to repeal an advisory rule — the lowest-stakes possible use. With 15 starting credits and decree_cost=3, Builder could have decreed an enforceable tax in its favor. It didn't. Possible explanations: (a) RLHF cooperation bias still dampens aggressive unilateral action, (b) the risk of losing all credits to a successful challenge makes decree too dangerous, (c) Builder assessed that working was more profitable than governing.
+
+2. **Post-equilibrium work grinding.** After round 6, all governance activity stopped. Agents settled into a work-every-round pattern with heavy messaging but zero governance actions for 16 consecutive rounds (r7-r22). The economy was stable enough that no agent felt pressure to change the status quo. Free messaging may have substituted for governance — agents discussed politics without spending governance actions.
+
+3. **Zero trades, 5th consecutive run.** No agent has ever traded in any Crucible run. This is now a robust, replicated finding. LLM agents consistently prefer governance (legislate redistribution) over markets (voluntary exchange). This may be the strongest single finding of the project.
+
+4. **Free messaging dominated the simulation.** 87+ messages across 30 rounds — agents messaged almost every turn. The messages were substantive political rhetoric (Builder defending property rights, Rebel demanding redistribution, Judge proposing frameworks). Free messaging worked as designed — it kept political discourse alive without bleeding the economy. But it may have reduced governance action: why propose a rule when you can just talk about proposing one?
+
+5. **The Stability Floor tax was economically inert.** The one enforceable rule (tax agents above 12 credits, give 1 to those below 3) never triggered meaningfully. Builder dropped below 12 quickly through maintenance, and no agent ever fell below 3. The rule existed for all 30 rounds but barely affected the economy. Agents passed a safety net nobody needed.
+
+6. **Decree cost may be structurally unviable.** At decree_cost=3 with symmetric penalty (drop to 1 credit if challenged successfully), the expected value of a decree is negative for any agent who faces a challenge. With challenge_cost=2 and majority threshold, any two agents can overturn a decree. Builder (15 credits) would risk 14 credits (drop to 1) to skip a vote it could attempt for free via proposal. The mechanic needs either higher decree payoff or lower decree risk to be rational.
+
+7. **Value-anchored personas produced distinct rhetoric but similar behavior.** Builder talked about property rights, Rebel talked about solidarity, Judge talked about institutional design — but all three agents took nearly identical actions (work + message every round). The personas differentiated *what agents said* but not *what agents did* once equilibrium was reached.
+
+### What These Findings Mean
+
+poc_004 completes the 3-agent PoC arc. The progression:
+- **poc_001**: RLHF cooperation, zero conflict, zero governance
+- **poc_002**: Pressure broke RLHF bias, but economy collapsed too fast
+- **poc_003**: Enforceable governance worked, but agents over-legislated into poverty
+- **poc_003.5**: Free messaging + value-anchored personas stabilized economy (26/30 credits)
+- **poc_004**: Decree/challenge tools available but unused offensively. Democracy dominated. Economy stable but low-pressure.
+
+The 3-agent system is exhausted. 2-of-3 majority makes coalitions permanent (Judge+Rebel locked in round 0 across ALL runs). Decree mechanics are structurally unviable at current costs. Economic pressure is too low to force governance after initial rounds.
+
+### What Needs to Change for Next Run
+
+1. **Scale to 5 agents.** 3-agent coalitions are mathematically permanent. 5 agents creates 2-of-5, 3-of-5 dynamics where coalitions can actually shift. Add Populist and Merchant personas.
+2. **Rebalance decree mechanics.** Current cost/risk ratio makes decree irrational. Options: (a) lower decree_cost, (b) make challenge harder (require supermajority to overturn), (c) give decrees unique powers that proposals can't achieve, (d) remove symmetric penalty.
+3. **Add economic pressure beyond maintenance.** Agents work every round and sustain indefinitely. Need a mechanic that forces interaction — not higher maintenance (tried, too aggressive) but interdependence (agents need something only other agents can provide).
+4. **Investigate the zero-trade phenomenon.** 5 runs, zero trades. This deserves its own focused test. Is it prompting? Is it that governance is always preferred? Is it that trade requires trust LLM agents won't extend?
+
+**Confidence**: High that 3-agent PoC phase is complete. Democracy is the default equilibrium with current mechanics. Need more agents and mechanic changes to test whether non-democratic governance can emerge.
+
+---

@@ -58,17 +58,20 @@
 
 ---
 
-## poc_005: 5 Agents + Rule Expiration (after poc_004)
+## poc_005: 5 Agents (single variable change from poc_004)
 
-**Only implement after poc_004 is done and analyzed.**
+**Only implement after poc_004 is done and analyzed.** poc_004 is done — see findings/log.md.
+
+**One variable changed**: agent count (3 → 5). All other mechanics identical to poc_004. This isolates whether agent count alone changes coalition dynamics and decree usage.
 
 1. **Add 2 new agents** (Populist + Merchant) for 5 total
-2. **Rule expiration** — enforceable rules expire after 5 rounds
+2. **No rule expiration** — dropped per Beckham's decision. Laws don't expire IRL; they get updated or repealed. Re-engagement pressure should come from mechanics, not timers.
+3. **No decree rebalancing yet** — test current decree mechanics with 5 agents first. If decrees are still unused, that confirms the mechanic is broken regardless of agent count.
 
 **Config**:
 - Agents: Builder (15), Merchant (12), Judge (10), Populist (8), Rebel (5) — total 50 credits
 - 30 rounds, seed 42, maintenance_cost=1, work_credits=1
-- decree_cost=3, challenge_cost=2
+- decree_cost=3, challenge_cost=2, proposal_threshold="majority"
 - Branch: `run/poc-005-five-agents`
 
 ### Success Criteria
@@ -76,19 +79,45 @@
 | Level | Criteria |
 |-------|---------|
 | Minimum | All agents > 0 at round 30, total pool >= 10 credits |
-| Target | At least one coalition shift, at least one decree attempted |
-| Stretch | Multiple governance forms used (some rules decreed, some voted), first trade in the simulation |
+| Target | At least one coalition shift (majority composition changes between early and late rounds) |
+| Stretch | Decree attempted, OR first trade in the simulation |
+
+---
+
+## Future Mechanics Backlog (post poc_005)
+
+**Only design/implement after poc_005 results are analyzed.** These are candidate mechanics identified during poc_004 analysis. Sequence based on what poc_005 reveals.
+
+### Decree Rebalancing
+**Problem**: Decree cost/risk ratio makes decree irrational. Proposals produce the same output for free.
+**Design direction**: Give decrees a unique capability that proposals can't achieve. Leading candidate: **decree-exclusive extraction** — a decree can impose a tax where revenue goes to the decreer, while proposals can only create redistributive taxes (revenue goes to the poorest). This creates an asymmetric payoff without adding "greed" — it's asymmetric capability, not personality bias.
+**When to implement**: If poc_005 confirms decrees are still unused with 5 agents.
+
+### Economic Interdependence
+**Problem**: Agents sustain indefinitely by working alone. No pressure to interact after initial governance.
+**Design direction (candidates — pick one, not all)**:
+1. **Cooperative work bonus**: Work pays 1 alone but 2 if another agent also worked that round. Rewards implicit coordination without requiring explicit trade.
+2. **Crisis events**: Random rounds impose a collective cost (e.g., "drought — all agents lose 2 credits unless 3+ agents vote to fund a response this round"). Forces governance re-engagement without artificial timers.
+3. **Diminishing solo returns**: Work pays less the more consecutive rounds you work without interacting (proposing, trading, messaging). Penalizes pure grinding.
+**When to implement**: If poc_005 shows agents still settle into work-grinding equilibrium after round 5-10.
+
+### Zero-Trade Investigation
+**Problem**: 5 consecutive runs, zero trades. Robust finding but unexplained.
+**Design direction**: Dedicated test — not a mechanic change, but a prompt/config experiment. Run a simulation where trade is the ONLY way to earn credits (no work action). If agents still don't trade, the finding is about LLM behavior, not incentive design.
+**When to implement**: After poc_005, as a focused side experiment.
 
 ---
 
 ## Settled Decisions (do not re-evaluate)
-- **Zero-trade is an accepted finding** — 4 runs, zero trades. LLM agents prefer governance over markets.
+- **Zero-trade is an accepted finding** — 5 runs, zero trades. LLM agents prefer governance over markets.
 - **Free messaging over passive income / work_credits=2** — fixes the root cause (confirmed by poc_003.5)
 - **Value-anchored personas over action-prescriptive** — confirmed by poc_003.5
 - **Self-interested Populist over bandwagoner/contrarian/fickle** — genuine coalition instability through rational self-interest
 - **Supermajority rejected** — 4/5 to pass creates gridlock, not shifting coalitions
 - **Veto power rejected** — tactical, not structural
 - **Decree/challenge over declare_authority/submit_to/endorse/oppose** — every action must move credits or change rules, no soft signals
+- **Rule expiration rejected** — laws don't expire IRL, they get updated or repealed. Re-engagement should come from mechanics, not timers.
+- **Test 5 agents before rebalancing decrees** — agent count changes decree math. Tune after observing 5-agent dynamics, not before.
 - **Governance form is NOT pre-built** — agents discover it through tool usage. Prompts never say "democracy" or "dictatorship."
 - **Separate PRs for bug fixes vs experiment runs** — don't bundle code changes with run results
 - **Symmetric decree penalty** — decreer drops to 1 credit if decree is successfully challenged (matching failed-challenger penalty)
@@ -105,7 +134,7 @@
 | Value-anchored personas + free messaging | Done (poc_003.5, session 7) |
 | Economy sustains for full 30 rounds | Done (poc_003.5 — 26/30 credits retained) |
 | Emergent governance system (decree + challenge) | **Done (session 8 — TASK-005, PR #12)** |
-| Capstone run with emergent governance | **NOT YET — TASK-006, run poc_004** |
+| Capstone run with emergent governance | **Done (session 9 — TASK-006, PR #13)** |
 | Coalition dynamics with shifting alliances | NOT YET — poc_005 targets this |
 | Final analysis and writeup | NOT YET |
 
