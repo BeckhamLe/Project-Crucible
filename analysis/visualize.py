@@ -64,15 +64,56 @@ def plot_gini_over_time(results_dir: str):
     print(f"  Saved: {results_dir}/gini_over_time.png")
 
 
+def _build_graph_from_rounds(results_dir: str) -> nx.DiGraph:
+    """Build communication graph from rounds.jsonl actions (handles free messages)."""
+    from collections import defaultdict
+
+    rounds_file = os.path.join(results_dir, "raw", "rounds.jsonl")
+    agents = set()
+    edge_weights = defaultdict(int)
+
+    with open(rounds_file) as f:
+        for line in f:
+            data = json.loads(line)
+            for entry in data.get("actions", []):
+                agent = entry["agent"]
+                action = entry.get("action", {})
+                action_type = action.get("action", "")
+                agents.add(agent)
+
+                if action_type == "free_private_message" and "to" in action:
+                    edge_weights[(agent, action["to"])] += 1
+                elif action_type == "free_public_message":
+                    # Broadcast — add edge to every other known agent
+                    for other in data.get("agent_order", []):
+                        if other != agent:
+                            edge_weights[(agent, other)] += 1
+                elif action_type == "propose_rule":
+                    for other in data.get("agent_order", []):
+                        if other != agent:
+                            edge_weights[(agent, other)] += 1
+                elif action_type == "trade" and "to" in action:
+                    edge_weights[(agent, action["to"])] += 1
+
+    G = nx.DiGraph()
+    G.add_nodes_from(agents)
+    for (frm, to), weight in edge_weights.items():
+        G.add_edge(frm, to, weight=weight)
+    return G
+
+
 def plot_network_graph(results_dir: str):
     """Plot the communication/interaction network."""
-    with open(os.path.join(results_dir, "results.json")) as f:
-        results = json.load(f)
+    # Try rounds.jsonl first (handles free messages), fall back to results.json
+    rounds_file = os.path.join(results_dir, "raw", "rounds.jsonl")
+    if os.path.exists(rounds_file):
+        G = _build_graph_from_rounds(results_dir)
+    else:
+        with open(os.path.join(results_dir, "results.json")) as f:
+            results = json.load(f)
+        G = build_communication_graph(results["interactions"])
 
-    interactions = results["interactions"]
-    G = build_communication_graph(interactions)
-
-    if len(G.nodes) == 0:
+    if len(G.nodes) == 0 or len(G.edges) == 0:
         print("  No interactions to plot.")
         return
 
@@ -94,7 +135,7 @@ def plot_network_graph(results_dir: str):
     edge_labels = {(u, v): str(G[u][v]["weight"]) for u, v in G.edges()}
     nx.draw_networkx_edge_labels(G, pos, edge_labels, font_size=9, ax=ax)
 
-    ax.set_title("Agent Interaction Network (edge weight = # interactions)")
+    ax.set_title("Agent Interaction Network (edge weight = # messages)")
     ax.axis("off")
     plt.tight_layout()
     plt.savefig(os.path.join(results_dir, "network_graph.png"), dpi=150)

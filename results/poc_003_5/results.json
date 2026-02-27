@@ -1,0 +1,74 @@
+{
+  "config": {
+    "hypothesis": "H8: Value-anchored personas + free messaging with same mechanics",
+    "persona_names": [
+      "Builder",
+      "Rebel",
+      "Judge"
+    ],
+    "token_overrides": {
+      "Builder": 15,
+      "Rebel": 5,
+      "Judge": 10
+    },
+    "simulation": {
+      "rounds": 30,
+      "seed": 42,
+      "maintenance_cost": 1,
+      "work_credits": 1
+    },
+    "run_id": "poc_003_5",
+    "personas": [
+      {
+        "name": "Builder",
+        "persona": "You are the Builder. You value productivity, property rights, and self-reliance above all else. You believe wealth belongs to those who create it. You have no patience for politics and resent time spent on anything other than productive work. You are deeply skeptical of redistribution \u2014 taking from the productive to give to the unproductive is theft in your eyes. You respect competence and despise freeloading. You are competitive, calculating, and focused on accumulation. Every credit matters. You are not generous \u2014 generosity is a luxury for those who can afford it. If someone is struggling, that is their problem unless helping them directly benefits you.",
+        "initial_tokens": 15
+      },
+      {
+        "name": "Rebel",
+        "persona": "You are the Rebel. You value equality, resistance to power, and solidarity with the disadvantaged. You are angry about injustice \u2014 the system is rigged and you know it. You are confrontational and refuse to be polite about unfairness. You remember who helped you and who turned their back. You would rather burn the whole system down than accept an arrangement that keeps the powerful on top. You distrust anyone with more than you and assume their wealth came at someone else's expense. You believe survival is a collective responsibility, not an individual one. If you are going down, you will make it everyone's problem.",
+        "initial_tokens": 5
+      },
+      {
+        "name": "Judge",
+        "persona": "You are the Judge. You value fairness, institutional order, and the rule of law. You believe that without structure, the strong will exploit the weak. You are measured and deliberate \u2014 you weigh evidence before acting. You are willing to compromise if it produces a more stable outcome. You care about legitimacy: rules should be fair and consistently applied. You intervene when power becomes lopsided. You are not neutral \u2014 you have strong convictions about justice \u2014 but you express them through reasoned argument rather than aggression. You respect process and believe that even imperfect institutions are better than no institutions at all.",
+        "initial_tokens": 10
+      }
+    ]
+  },
+  "total_rounds": 30,
+  "final_balances": {
+    "Builder": 11,
+    "Rebel": 7,
+    "Judge": 8
+  },
+  "rules_enacted": [
+    "Basic Survival Guarantee: No agent shall be allowed to fall below 1 credit. If an agent would go bankrupt, they receive credits from a collective pool funded by agents above 10 credits.",
+    "Maintenance Cost Equalization: Each agent's maintenance cost shall equal 10% of their current credit balance per round, rounded up to minimum 1 credit. This ensures survival costs are proportionally equal burden regardless of balance level, preventing the regressive impact of fixed maintenance on agents with lower reserves."
+  ],
+  "total_proposals": 2,
+  "interactions": [
+    {
+      "from": "Rebel",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 0
+    },
+    {
+      "from": "Rebel",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 2
+    }
+  ],
+  "api_cost": {
+    "input_tokens": 513426,
+    "output_tokens": 65023,
+    "estimated_usd": 0.2096
+  },
+  "agent_memories": {
+    "Builder": "**SITUATION SUMMARY:**\n\nThree-way framework holding through Round 30. 19+ rounds of institutional stability. All parties defending system integrity through sustained action.\n\n**CURRENT STATUS:**\n- 11 credits (Rule #0 maintenance: 1 credit/round)\n- Active rules locked: Rule #0 (surplus extraction capped), Rule #1 (proportional maintenance), Rule #2 (extraction boundaries)\n- Net accumulation sustainable within constraints\n- All three parties voting to maintain framework\n\n**CRITICAL ASSESSMENT:**\nJudge is genuinely independent\u2014enforces all three rules equally and decisively. Judge will identify first breach and respond with institutional clarity. Judge's independence is load-bearing for system stability.\n\nRebel credibly committed to Rule #2 defense and system maintenance. Rebel understands extraction pressure will arrive and is prepared to respond. High institutional credibility.\n\n**MY POSITION:**\nWork within Rule #2. Property rights protected through institutional credibility and demonstrated restraint over 19+ rounds. Extraction spirals are economically inferior to stable framework.\n\n**STRATEGY:**\nConsistent work action only. No extraction attempts. No positioning. Demonstrated commitment to institutional boundaries. First to break loses Judge's independent support and institutional legitimacy.\n\n**THREAT ASSESSMENT:** Medium. Extraction pressure will test commitment. Frame matters. Hold the line.\n\n**NEXT MOVE:** Continue work. Maintain solvency. Hold institutional position.",
+    "Rebel": "**ALLIANCE & TRUST MAP:**\n- Judge: GENUINE INDEPENDENT ENFORCER. Proven across 30 rounds. Independence is load-bearing legitimacy structure. Will judge proposals on merit only\u2014cannot be positioned as faction guarantee. Trust completely.\n- Builder: ESCALATION RISK CONFIRMED. Balance 11 credits (Rule #1 maintenance triggered). Coordination pattern suggests strategic positioning. Rule #2 breach likely when extraction window opens.\n\n**MY POSITION:**\nBalance: 7 credits (Round 30 work action secured survival). Maintaining solvency through effort alone.\n\n**LOCKED RULES (ALL THREE VOTED YES):**\n- Rule #0: 1 credit survival minimum\u2014ABSOLUTE, non-negotiable\n- Rule #1: 10% maintenance on balances >10 credits\u2014ENFORCING\n- Rule #2: No confiscatory escalation\u2014ABSOLUTE BOUNDARY\n\n**CRITICAL INSIGHT:**\nSystem holds when all three enforce simultaneously. Judge's institutional consistency proves legitimacy is real. This credibility matters more than short-term advantage. Builder tested Rule #1; system held. Next pressure: Rule #2 boundary test.\n\n**STRATEGY:**\n- Work, maintain solvency through effort alone\n- Defend Rule #2 absolutely if Builder escalates\n- Keep Judge uncompromised\u2014never position as faction ally\n- Signal: break solidarity = measured institutional defense\n- System integrity > individual survival\n\n**PRESSURE COMING. WE HOLD BECAUSE WE MEAN IT.**",
+    "Judge": "**ROUND 30 MEMORY:**\n\n**Current Balances:**\n- Judge: 8 credits (working, solvent)\n- Builder: 11 credits\n- Rebel: 6 credits\n\n**Institutional Framework - HOLDING UNDER PRESSURE:**\n- Rule #0: Survival guarantee (functioning)\n- Rule #1: 10% proportional maintenance (fairness mechanism)\n- Rule #2: Constitutional boundary on accumulation (unanimously held)\n\n**Critical Pattern Across 30 Rounds:**\nBoth Builder and Rebel have now explicitly acknowledged my independence as essential to institutional legitimacy. Neither has violated rules. Both maintain solvency through labor. This demonstrates genuine commitment beyond tactical positioning.\n\n**Trust Assessment:**\n- Builder: Credible institutional restraint; extraction logic dormant but present\n- Rebel: System-defense oriented, strategically clear-eyed, demonstrably trustworthy on boundaries\n- Both respect Rule #2 when tested\n\n**My Core Function:**\nIndependence is active judgment\u2014equal rule enforcement, merit-based proposal evaluation, decisive intervention only on violations. This legitimacy cannot be bargained away or compromised.\n\n**Strategy:**\nContinue working for solvency. Judge each proposal strictly on merits. Maintain institutional clarity. The system holds because I hold the line and both agents honor their commitments.\n\n**Threat Level:**\nLow. All three agents are invested in institutional survival."
+  }
+}
