@@ -36,3 +36,8 @@
 - **Prediction**: When governance has enforcement power (tax, sanction, repeal) and agents can generate wealth (work action), political structures become operational — not just rhetorical. At least one enforceable rule passes and executes, economic activity increases vs poc_002, and agents adapt behavior in response to enforcement.
 - **Test**: poc_003 — maintenance_cost=1, work_credits=1, free voting, enforceable rule types (tax/sanction/repeal), 30 rounds, same wealth tiers (15/5/10)
 - **Status**: PARTIALLY CONFIRMED (poc_003) — Enforceable tax rules passed and executed mechanically (credits actually moved rounds 2-7). But enforcement became inert by mid-game as economy bled below all thresholds. Governance was operational but couldn't save a shrinking economy. Coalition capture (Judge+Rebel 2v1) was stable and immediate. No sanctions used, no trades, no free voting adoption.
+
+## H9: Emergent governance tools produce non-democratic political structures
+- **Prediction**: When agents have decree (unilateral rule creation) and challenge (unilateral repeal) tools alongside democratic proposals, at least some governance will be non-democratic — decrees will be used offensively, not just defensively
+- **Test**: poc_004 — decree_cost=3, challenge_cost=2, proposal_threshold="majority", value-anchored personas, free messaging
+- **Status**: NOT CONFIRMED (poc_004) — Agents had decree and challenge tools but chose democracy almost exclusively. The one decree (Builder, round 22) was a defensive repeal of an advisory rule, not authoritarian. No challenges occurred. Democracy was the dominant equilibrium. Possible causes: (a) decree cost/risk ratio makes it irrational, (b) RLHF bias toward consensus, (c) 3-agent majority is too easy to achieve via voting.
