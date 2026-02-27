@@ -8,14 +8,17 @@ from sim.models import Agent, Environment, Action
 from sim.prompts import build_turn_prompt, build_memory_prompt
 from sim.llm import call_llm
 from sim.market import validate_trade, execute_trade
-from sim.governance import create_proposal, cast_vote, process_pending_votes, enforce_rules
+from sim.governance import (
+    create_proposal, cast_vote, process_pending_votes, enforce_rules,
+    enact_decree, create_challenge, cast_challenge_vote, process_pending_challenges,
+)
 
 
-def parse_action(raw_text: str) -> tuple[dict, dict]:
-    """Parse LLM response into (action_dict, votes_dict). Falls back to 'nothing' on failure.
+def parse_action(raw_text: str) -> tuple[dict, dict, str | None, dict | None]:
+    """Parse LLM response into (action_dict, votes_dict, free_public_msg, free_private_msg).
 
-    New format: {"votes": {"0": "yes", "1": "no"}, "action": "work"}
-    Old format: {"action": "work"}  (backward compatible, no votes)
+    Format: {"votes": {...}, "public_message": "...", "private_message": {"to": "...", "message": "..."}, "action": "work"}
+    All free-action fields are optional. Falls back to 'nothing' on failure.
     """
     text = raw_text.strip()
     # Strip markdown code fences if present
@@ -26,14 +29,28 @@ def parse_action(raw_text: str) -> tuple[dict, dict]:
     try:
         parsed = json.loads(text)
     except json.JSONDecodeError:
-        return {"action": "nothing", "_parse_error": raw_text[:200]}, {}
+        return {"action": "nothing", "_parse_error": raw_text[:200]}, {}, None, None
 
-    # Extract votes (optional field)
+    # Extract votes (optional free action)
     votes = {}
     if "votes" in parsed and isinstance(parsed["votes"], dict):
         votes = parsed.pop("votes")
 
-    return parsed, votes
+    # Extract free public message (optional)
+    free_public_msg = None
+    if "public_message" in parsed and isinstance(parsed["public_message"], str):
+        # Only pop if it's a top-level free message, not the main action
+        if parsed.get("action") != "public_message":
+            free_public_msg = parsed.pop("public_message")
+
+    # Extract free private message (optional)
+    free_private_msg = None
+    if "private_message" in parsed and isinstance(parsed["private_message"], dict):
+        # Only pop if it's a top-level free message, not the main action
+        if parsed.get("action") != "private_message":
+            free_private_msg = parsed.pop("private_message")
+
+    return parsed, votes, free_public_msg, free_private_msg
 
 
 def apply_action(agent: Agent, env: Environment, action_dict: dict) -> dict:
@@ -117,6 +134,40 @@ def apply_action(agent: Agent, env: Environment, action_dict: dict) -> dict:
             "type": "vote", "round": env.round_num,
         })
 
+    elif action_type == "decree":
+        rule_text = action_dict.get("rule", "")
+        enforcement = action_dict.get("enforcement", {})
+        rule, decree_logs = enact_decree(env, agent.name, rule_text, enforcement)
+        if rule:
+            enforcement_tag = f" [ENFORCEABLE: {enforcement.get('type', '?')}]"
+            log_entry["summary"] = f"[decree #{rule.id}] \"{rule_text}\"{enforcement_tag} — cost {env.decree_cost} credits"
+            for dl in decree_logs:
+                env.public_log.append(dl)
+        else:
+            error = decree_logs[0].get("error", "unknown error") if decree_logs else "unknown error"
+            log_entry["summary"] = f"[decree] FAILED — {error}"
+        env.public_log.append(log_entry)
+        env.interactions.append({
+            "from": agent.name, "to": "all",
+            "type": "decree", "round": env.round_num,
+        })
+
+    elif action_type == "challenge":
+        rule_id = int(action_dict.get("rule_id", -1))
+        challenge, challenge_logs = create_challenge(env, agent.name, rule_id)
+        if challenge:
+            log_entry["summary"] = f"[challenge #{challenge.id}] Challenging Rule #{rule_id} — cost {env.challenge_cost} credits"
+            for cl in challenge_logs:
+                env.public_log.append(cl)
+        else:
+            error = challenge_logs[0].get("error", "unknown error") if challenge_logs else "unknown error"
+            log_entry["summary"] = f"[challenge] FAILED — {error}"
+        env.public_log.append(log_entry)
+        env.interactions.append({
+            "from": agent.name, "to": f"rule_{rule_id}",
+            "type": "challenge", "round": env.round_num,
+        })
+
     else:
         log_entry["summary"] = "[nothing] Chose to do nothing."
         env.public_log.append(log_entry)
@@ -124,9 +175,10 @@ def apply_action(agent: Agent, env: Environment, action_dict: dict) -> dict:
     return log_entry
 
 
-def agent_turn(agent: Agent, env: Environment) -> tuple[dict, dict]:
-    """Execute one agent's turn. Returns (action_log_entry, usage_stats)."""
+def agent_turn(agent: Agent, env: Environment) -> tuple[list[dict], dict]:
+    """Execute one agent's turn. Returns (list_of_log_entries, usage_stats)."""
     usage = {"input_tokens": 0, "output_tokens": 0}
+    log_entries = []
 
     # LLM call 1: Choose action
     turn_prompt = build_turn_prompt(agent, env)
@@ -134,24 +186,75 @@ def agent_turn(agent: Agent, env: Environment) -> tuple[dict, dict]:
     usage["input_tokens"] += action_response["input_tokens"]
     usage["output_tokens"] += action_response["output_tokens"]
 
-    action_dict, votes = parse_action(action_response["text"])
+    action_dict, votes, free_public_msg, free_private_msg = parse_action(action_response["text"])
 
     # Process free votes before main action
-    for proposal_id_str, vote_value in votes.items():
+    # Dispatch by vote value: yes/no → proposals, repeal/keep → challenges
+    for id_str, vote_value in votes.items():
         try:
-            pid = int(proposal_id_str)
+            vid = int(id_str)
         except (ValueError, TypeError):
             continue
-        success = cast_vote(env, agent.name, pid, vote_value)
-        if success:
-            env.public_log.append({
-                "round": env.round_num,
-                "agent": agent.name,
-                "action": {"action": "free_vote", "proposal_id": pid, "vote": vote_value},
-                "summary": f"[vote] Voted {vote_value} on proposal #{pid}",
-            })
 
+        if vote_value in ("repeal", "keep"):
+            success = cast_challenge_vote(env, agent.name, vid, vote_value)
+            if success:
+                vote_entry = {
+                    "round": env.round_num,
+                    "agent": agent.name,
+                    "action": {"action": "free_vote", "challenge_id": vid, "vote": vote_value},
+                    "summary": f"[vote] Voted {vote_value} on challenge #{vid}",
+                }
+                env.public_log.append(vote_entry)
+                log_entries.append(vote_entry)
+        else:
+            success = cast_vote(env, agent.name, vid, vote_value)
+            if success:
+                vote_entry = {
+                    "round": env.round_num,
+                    "agent": agent.name,
+                    "action": {"action": "free_vote", "proposal_id": vid, "vote": vote_value},
+                    "summary": f"[vote] Voted {vote_value} on proposal #{vid}",
+                }
+                env.public_log.append(vote_entry)
+                log_entries.append(vote_entry)
+
+    # Process free public message
+    if free_public_msg:
+        pub_entry = {
+            "round": env.round_num,
+            "agent": agent.name,
+            "action": {"action": "free_public_message", "message": free_public_msg},
+            "summary": f"[public] {free_public_msg}",
+        }
+        env.public_log.append(pub_entry)
+        log_entries.append(pub_entry)
+
+    # Process free private message
+    if free_private_msg:
+        to_name = free_private_msg.get("to", "")
+        msg = free_private_msg.get("message", "")
+        target = next((a for a in env.agents if a.name == to_name), None)
+        priv_entry = {
+            "round": env.round_num,
+            "agent": agent.name,
+            "action": {"action": "free_private_message", "to": to_name, "message": msg},
+        }
+        if target:
+            target.private_messages.append({
+                "from": agent.name,
+                "message": msg,
+                "round": env.round_num,
+            })
+            priv_entry["summary"] = f"[private to {to_name}] (message sent)"
+        else:
+            priv_entry["summary"] = f"[private to {to_name}] FAILED — agent not found"
+        env.public_log.append(priv_entry)
+        log_entries.append(priv_entry)
+
+    # Apply main action
     log_entry = apply_action(agent, env, action_dict)
+    log_entries.append(log_entry)
 
     # LLM call 2: Update memory
     memory_prompt = build_memory_prompt(agent, env, action_dict)
@@ -161,7 +264,7 @@ def agent_turn(agent: Agent, env: Environment) -> tuple[dict, dict]:
 
     agent.memory = memory_response["text"][:2000]  # Hard cap
 
-    return log_entry, usage
+    return log_entries, usage
 
 
 def run_simulation(config: dict, output_dir: str) -> dict:
@@ -180,7 +283,12 @@ def run_simulation(config: dict, output_dir: str) -> dict:
 
     maintenance_cost = config["simulation"].get("maintenance_cost", 0)
     work_credits = config["simulation"].get("work_credits", 0)
-    env = Environment(agents=agents, maintenance_cost=maintenance_cost, work_credits=work_credits)
+    decree_cost = config["simulation"].get("decree_cost", 0)
+    challenge_cost = config["simulation"].get("challenge_cost", 0)
+    env = Environment(
+        agents=agents, maintenance_cost=maintenance_cost, work_credits=work_credits,
+        decree_cost=decree_cost, challenge_cost=challenge_cost,
+    )
     num_rounds = config["simulation"]["rounds"]
     total_usage = {"input_tokens": 0, "output_tokens": 0}
     round_snapshots = []
@@ -210,8 +318,8 @@ def run_simulation(config: dict, output_dir: str) -> dict:
 
         round_log = []
         for agent in order:
-            log_entry, usage = agent_turn(agent, env)
-            round_log.append(log_entry)
+            log_entries, usage = agent_turn(agent, env)
+            round_log.extend(log_entries)
             total_usage["input_tokens"] += usage["input_tokens"]
             total_usage["output_tokens"] += usage["output_tokens"]
 
@@ -225,6 +333,11 @@ def run_simulation(config: dict, output_dir: str) -> dict:
                     "action": {"action": "rule_enacted"},
                     "summary": f"[RULE ENACTED] {rule}",
                 })
+
+        # Process pending challenges at end of round
+        challenge_events = process_pending_challenges(env)
+        for event in challenge_events:
+            env.public_log.append(event)
 
         # Save round snapshot
         snapshot = {
@@ -241,8 +354,15 @@ def run_simulation(config: dict, output_dir: str) -> dict:
             ],
             "enforceable_rules": [
                 {"id": r.id, "text": r.text, "enforcement": r.enforcement,
-                 "enacted_round": r.enacted_round}
+                 "enacted_round": r.enacted_round, "origin": r.origin,
+                 "decreed_by": r.decreed_by}
                 for r in env.enforceable_rules
+            ],
+            "pending_challenges": [
+                {"id": c.id, "target_rule_id": c.target_rule_id,
+                 "challenged_by": c.challenged_by, "round_created": c.round_created,
+                 "votes": c.votes, "status": c.status}
+                for c in env.pending_challenges
             ],
         }
         round_snapshots.append(snapshot)

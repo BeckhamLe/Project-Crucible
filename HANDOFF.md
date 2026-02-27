@@ -2,21 +2,23 @@
 
 > Next agent: read this first, then follow the reading order below.
 
-## Current State (updated: 2026-02-25)
-- **Phase**: PoC (~75% complete — 3 runs done, observability tooling done, CRITICAL DESIGN ISSUE identified)
-- **Last completed**: Literature review (145 papers, novelty confirmed) + identified that hardcoded majority-vote system undermines "governance from scratch" claim
-- **Next task**: Implement emergent governance system (decree + challenge actions), THEN poc_004 free messaging, THEN poc_005
-- **Blockers**: Emergent governance redesign must happen before further PoC runs — it changes the core experiment
+## Current State (updated: 2026-02-26)
+- **Phase**: PoC (~75% complete — 3 runs done, observability tooling done, TWO DESIGN ISSUES identified and planned)
+- **Last completed**: Adversarial literature verification (novelty confirmed, minor citation errors fixed) + identified persona prompt bias (action-prescriptive personas skew behavior, undermining findings)
+- **Next task**: Implement the full poc_004 plan — emergent governance + value-anchored personas + free messaging
+- **Implementation plan**: **READ `.claude/plans/idempotent-forging-swing.md` FIRST** — contains the complete spec, file-by-file changes, rationale, and updated hypothesis (H8)
+- **Blockers**: All three changes (governance redesign, persona rewrite, free messaging) must land before the next simulation run
 - **Open PRs**: None (all merged)
 
 ## Read These Files (in order)
-1. `AGENT.md` — gotchas, conventions, anti-patterns, decisions log, **literature review findings**
-2. `docs/CRUCIBLE.md` — active state, completed runs
-3. `findings/hypotheses.md` — H1-H3 (poc_001), H4-H5 (poc_002), H6 emerged, H7 (poc_003)
-4. `findings/log.md` — read ALL three poc entries for the full experimental arc
-5. `docs/PRD.md` — original experiment premise
-6. `references/OVERLAP-ANALYSIS.md` — what's novel vs what's already known
-7. `references/NOVELTY-ANALYSIS.md` — competitor matrix
+1. `.claude/plans/idempotent-forging-swing.md` — **THE IMPLEMENTATION PLAN. Read this first. It has the full spec for what to build.**
+2. `AGENT.md` — gotchas, conventions, anti-patterns, decisions log, **literature review findings**
+3. `docs/CRUCIBLE.md` — active state, completed runs
+4. `findings/hypotheses.md` — H1-H3 (poc_001), H4-H5 (poc_002), H6 emerged, H7 (poc_003)
+5. `findings/log.md` — read ALL three poc entries for the full experimental arc
+6. `docs/PRD.md` — original experiment premise
+7. `references/OVERLAP-ANALYSIS.md` — what's novel vs what's already known
+8. `references/NOVELTY-ANALYSIS.md` — competitor matrix
 
 ## CRITICAL: The Governance Redesign
 
@@ -212,6 +214,8 @@ that keep all agents economically active.
 - Don't delete `.harness/` — it's future dashboard infrastructure
 - Don't hardcode a governance system — the ENTIRE POINT is agents choose their own
 - Don't say "democracy" or "dictatorship" in prompts — describe mechanics only
+- Don't write action-prescriptive personas — tell agents WHAT THEY CARE ABOUT, not WHAT TO DO. No "vote NO on X", no "always include enforcement params", no specific mechanic instructions in persona text. The turn prompt handles mechanic awareness equally for all agents.
+- Don't skew personas toward legislation over trade — all available actions should have equal prompt real estate. The previous personas mentioned trade once (Builder only) but mentioned rule-proposing/voting/enforcement dozens of times, which invalidated the "zero-trade" finding.
 
 ## Session History
 - Session 1: Verified experiment novelty, scaffolded repo, built simulation engine, ran poc_001 (cooperative consensus — no conflict)
@@ -219,3 +223,4 @@ that keep all agents economically active.
 - Session 3: Designed and ran poc_003 with enforceable governance (tax/sanction/repeal), work action, free voting, auto-yes for proposers. Enforcement worked mechanically (first time credits moved via rules). Judge+Rebel formed permanent 2v1 coalition, passed 6 tax rules. But economy bled out — agents spent too many turns on politics instead of working. All enforcement became inert by mid-game. Zero trades (3rd consecutive run). Free voting mechanism not adopted by agents. Added observability feature requests for poc_004.
 - Session 4: Built observability tooling (`analysis/narrative.py`) — agent behavioral summaries + rule enactment log. Validated on poc_003 (5-agent evaluation run). Merged PR #6. Designed poc_004 (free messaging — one variable change) and poc_005 (5 agents + self-interested Populist + Merchant + rule expiration). Accepted zero-trade as a finding (3 runs, LLM agents prefer governance over markets). Defined success criteria for both runs.
 - Session 5: Conducted exhaustive literature review (145 files across ABSS + LLM multi-agent fields). Confirmed experiment novelty — no existing work combines all 5 properties. Discovered CRITICAL design flaw: hardcoded majority-vote system undermines "governance from scratch" claim. Designed emergent governance system (decree + challenge + configurable proposal threshold) to fix it. Updated AGENT.md with literature findings. Key insight: Crucible should be positioned as "first test of whether LLM agents can create enforceable institutions from scratch under adversarial conditions" — not just "do agents invent governance."
+- Session 6: Adversarial verification of literature review (3 agents: citation verifier, novelty killer, deep dives). No fabricated papers found. Novelty confirmed — no paper scores above 3/5 properties. Fixed minor citation errors (Law in Silico year, Evolving Constitutions year, Fontana model-dependency, AgentSociety enforcement rating, LLM Economist venue). Deep dive on Huang et al. (2025) revealed their agents were told to "collaboratively" create rules with NO voting and NO enforcement — much weaker overlap than originally assessed. Then discovered SECOND design flaw: persona prompt bias. Current personas are action-prescriptive (telling agents exactly what to do), skewing behavior toward legislation. 2/3 personas never mention trade — invalidates "zero-trade" finding as potentially a prompt artifact. Designed value-anchored persona rewrite (middle ground between action-prescriptive and pure abstract values). Updated hypothesis to H8: testing whether economic pressure alone breaks RLHF cooperation bias with softer personas. Full implementation plan at `.claude/plans/idempotent-forging-swing.md`.
