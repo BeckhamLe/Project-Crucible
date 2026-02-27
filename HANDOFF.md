@@ -140,7 +140,7 @@ The simulation hardcodes majority-vote democracy as the ONLY way to create enfor
 | Final analysis and writeup | NOT YET |
 
 ## Standard Workflow
-`/plan` → `/ship` (repeat) → `/verify` → review results → document findings → `/pr`
+`/plan` → `/preflight` → `/ship` (repeat) → `/verify` → review results → document findings → `/pr`
 
 - `/plan` defines success criteria in task files (acceptance criteria must be mechanically evaluable from data)
 - `/ship` implements tasks one at a time; suggests `/verify` when the last task completes
