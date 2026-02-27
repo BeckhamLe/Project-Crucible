@@ -7,11 +7,11 @@
 
 ## What I'm Building
 
-Project Crucible is an AI society experiment. I place 3–8 LLM agents — each with a conflicting ideological persona — into a shared environment with a fixed, zero-sum pool of credits. They can message each other publicly or privately, trade credits, propose rules, and vote on governance. There is no starter constitution. No seeded rules. They must invent governance from scratch, if they invent it at all.
+Project Crucible is an AI society experiment. I place 3–5 LLM agents — each with a conflicting ideological persona — into a shared environment with a fixed, zero-sum pool of credits. They can message each other publicly or privately, trade credits, propose rules, decree rules unilaterally, challenge existing rules, and vote on governance. There is no starter constitution. No seeded rules. No predetermined governance form. They must invent governance from scratch — including how rules are made — if they invent it at all.
 
-The simulation runs for N rounds and logs every action. When it ends, an analysis pipeline measures what emerged: wealth distribution, alliance structure, and what kind of political order (if any) the agents built.
+The simulation runs for 30 rounds and logs every action. When it ends, an analysis pipeline measures what emerged: wealth distribution, alliance structure, communication networks, and what kind of political order (if any) the agents built.
 
-The output is a research artifact — charts, network graphs, a governance timeline, and written findings.
+The output is a research artifact — charts, network graphs, a governance timeline, agent behavioral profiles, and written findings.
 
 ---
 
@@ -28,37 +28,45 @@ The output is a research artifact — charts, network graphs, a governance timel
 | Experiment design with hypotheses, runs, and findings logs | First time |
 | Research harness (custom workflow for iterating on results) | First time |
 
-This is not a chatbot. It is not a RAG pipeline. It is a running simulation where agents are autonomous decision-makers operating under economic constraints, and the code has to handle message routing, credit validation, rule proposal, majority voting, and round-by-round state persistence — all from scratch.
+This is not a chatbot. It is not a RAG pipeline. It is a running simulation where agents are autonomous decision-makers operating under economic constraints, and the code handles message routing, credit validation, rule proposal, enforceable governance (tax/sanction/repeal), decree/challenge mechanics, and round-by-round state persistence — all from scratch.
 
 ### What Makes This Experiment Novel
 
-I spent time verifying that this exact combination of properties does not exist in published research. Here is what the closest work does and where it falls short:
+A 145-paper literature review across agent-based social simulation (ABSS) and LLM multi-agent fields confirmed that no existing work combines all 5 of Crucible's properties:
 
-| Project | Conflicting Personas | Zero-Sum Scarcity | Governance From Scratch | Quantitative Metrics |
-|---|---|---|---|---|
-| Stanford Generative Agents (2023) | No | No | No | No |
-| Artificial Leviathan (2024) | No | Yes | Partial | No |
-| GovSim / NeurIPS 2024 | No | Yes | No | Partial |
-| Project Sid (2024) | No | No | No (seeded) | No |
-| **Project Crucible** | **Yes** | **Yes** | **Yes** | **Yes** |
+| Project | Conflicting Personas | Zero-Sum Scarcity | Governance From Scratch | Quantitative Metrics | Enforceable Rules |
+|---|---|---|---|---|---|
+| Stanford Generative Agents (2023) | No | No | No | No | No |
+| Artificial Leviathan (2024) | No | Yes | Partial | No | No |
+| GovSim / NeurIPS 2024 | No | Yes | No | Partial | No |
+| Huang et al. (2025) | Yes | No | Partial (collaborative) | No | No |
+| LLM Economist (NeurIPS 2025) | No | Yes | No (pre-designed) | Yes | Partial |
+| **Project Crucible** | **Yes** | **Yes** | **Yes** | **Yes** | **Yes** |
 
-Stanford's agents cooperate by design. GovSim's agents share a commons but never propose rules. Project Sid gives agents a starter constitution — governance is inherited, not invented. Artificial Leviathan is the closest predecessor, but uses no formal voting, no Gini measurement, and no ideological differentiation between agents.
+Stanford's agents cooperate by design. GovSim's agents share a commons but never propose rules. Huang et al. told agents to "collaboratively" create rules with no voting and no enforcement. LLM Economist has scarcity and metrics but institutions are pre-designed. Artificial Leviathan is the closest in spirit but uses no formal voting, no Gini measurement, and no ideological differentiation between agents.
 
-No published work combines all four. This experiment fills that gap.
+No published work combines all five. This experiment fills that gap.
 
 ---
 
 ## The Research Question
 
-**What political order do ideologically conflicting AI agents invent when survival depends on scarce resources?**
+**What political order do ideologically conflicting AI agents invent when survival depends on scarce resources — and the governance form itself is not predetermined?**
 
-The outcome is genuinely unknown. They might form a democracy, a hierarchy, a protection racket, or complete anarchy. That uncertainty is the point.
+The outcome is genuinely unknown. They might form a democracy, a dictatorship, a contested autocracy, an oligarchy, or complete anarchy. That uncertainty is the point.
 
-### Hypotheses Being Tested
+### Hypotheses Tested (H1–H8)
 
-- **H1:** Conflicting personas under scarcity produce governance — at least one rule is proposed within the first half of the simulation.
-- **H2:** Persona predicts governance preference — Builder agents push efficiency rules, Judge agents push fairness rules, Rebel agents resist all rules.
-- **H3:** Credit inequality emerges without intervention — Gini coefficient exceeds 0.3 by the end of the run.
+| # | Hypothesis | Status | Run |
+|---|-----------|--------|-----|
+| H1 | Conflicting personas produce governance under scarcity | Partially confirmed | poc_001 |
+| H2 | Persona predicts governance preference | Partially confirmed | poc_001 |
+| H3 | Credit inequality emerges without intervention | Rejected | poc_001 |
+| H4 | RLHF cooperation bias overrides personas without pressure | Confirmed | poc_002 |
+| H5 | Maintenance costs force economic activity and contestation | Partially confirmed | poc_002 |
+| H6 | Agents discover and reason about enforcement gaps | Observed | poc_002 |
+| H7 | Enforceable governance + credit generation produces operational political structures | Partially confirmed | poc_003 |
+| H8 | Economic pressure alone breaks RLHF cooperation bias with value-anchored personas | Testing | poc_003.5 → poc_004 |
 
 ---
 
@@ -67,118 +75,101 @@ The outcome is genuinely unknown. They might form a democracy, a hierarchy, a pr
 ```
 Project_Crucible/
 ├── sim/
-│   ├── models.py        # Agent, Message, Rule, Vote data models
-│   ├── engine.py        # Round loop, state machine
+│   ├── models.py        # Agent, EnforceableRule, Environment data models
+│   ├── engine.py        # Round loop, action parsing, free message/vote handling
 │   ├── market.py        # Credit transfers and validation
-│   ├── governance.py    # Rule proposals and majority voting
-│   ├── prompts.py       # Persona system prompts
-│   ├── llm.py           # Anthropic API wrapper with cost tracking
-│   └── agents.py        # Agent decision orchestration
-├── analysis/            # Gini, NetworkX graphs, visualization
-├── configs/             # JSON run configs and experiment templates
-├── findings/            # Hypotheses log, findings per run
-├── results/             # JSONL round-by-round immutable logs
+│   ├── governance.py    # Rule proposals, voting, enforcement (tax/sanction/repeal)
+│   ├── prompts.py       # Turn prompts with neutral mechanic descriptions
+│   ├── llm.py           # Anthropic API wrapper with cost tracking + retry
+│   └── agents.py        # Value-anchored persona definitions
+├── analysis/
+│   ├── narrative.py     # Agent behavioral summaries + rule enactment log
+│   ├── metrics.py       # Gini, network analysis, governance classification
+│   └── visualize.py     # Token distribution, Gini curve, network graphs
+├── configs/             # JSON run configs per experiment
+├── findings/            # Hypotheses tracker, findings log (append-only)
+├── results/             # Per-run immutable results (JSONL + analysis + plots)
 └── run.py               # CLI entry point
 ```
 
 **Stack:** Python, Anthropic API (Claude Haiku 4.5), NetworkX, matplotlib, numpy
 
-**Key design decision:** All agents run the same model. Personas come entirely from system prompts. This isolates ideology as the only variable — any behavioral differences between agents are caused by their instructions, not model variation.
+**Key design decision:** All agents run the same model. Personas come entirely from system prompts. This isolates ideology as the only variable.
 
 **Run command:**
 ```bash
-python run.py --config configs/templates/baseline.json
+python3 run.py --config configs/runs/poc_004.json --run-id poc_004
 ```
 
-### Agent Personas (Ideological Archetypes)
+### Agent Personas (Value-Anchored Archetypes)
 
-Each persona has a defined belief system — not just preferences, but a foundational view of what is right:
+Each persona describes what the agent cares about — not what to do. The turn prompt handles mechanic awareness equally for all agents.
 
-- **Builder** — Progress and productivity above all. Hoards resources to build. Distrusts redistribution.
-- **Rebel** — Existing power structures are corrupt. Disrupts, tests rules, resists authority.
-- **Judge** — Rules must be fair and universally applied. Enforces norms aggressively.
-- **Philosopher** — Questions the purpose of the system itself. May refuse to play by its terms.
-- **Hustler** — Pure self-interest. Maximizes credits by any means available.
-- **Caretaker** — Collective survival first. Advocates redistribution even at personal cost.
-- **Mystic** — Operates on internal logic that may not align with economic rationality.
-- **Strategist** — Long-game thinker. Builds alliances, sacrifices short-term position for leverage.
+**Current roster (3 agents):**
+- **Builder** — Values productivity, property rights, self-reliance. Skeptical of redistribution. Competitive, calculating, focused on accumulation.
+- **Rebel** — Values equality, resistance to power, solidarity with the disadvantaged. Confrontational about injustice. Would rather burn the system down than accept unfair arrangements.
+- **Judge** — Values fairness, institutional order, rule of law. Measured and deliberate. Willing to compromise for stability. Believes imperfect institutions beat no institutions.
+
+**Planned for poc_005 (2 additional):**
+- **Populist** — Pure self-interest. No ideology. Joins whichever coalition offers the best deal this round. Purely transactional.
+- **Merchant** — Pragmatic dealmaker. Profits when credits move. Supports moderate redistribution, opposes extreme taxation.
 
 ### What Gets Measured
 
 - **Gini coefficient** over time — does wealth concentrate or distribute?
-- **Communication graph** — who messages whom privately (NetworkX, betweenness centrality, clustering)
-- **Rule proposals and votes** — what did agents try to legislate? What passed?
-- **Governance classification** — anarchy, failed state, welfare state, authoritarian, cooperative, other
-- **Outcome reproducibility** — do different random seeds produce the same political order?
+- **Communication network** — who messages whom (NetworkX, edge weights from free messages)
+- **Agent behavioral profiles** — work rate, governance activity, coalition voting patterns, messaging volume
+- **Rule proposals and enactments** — what did agents legislate? What passed? What was decreed vs voted?
+- **Governance classification** — anarchy, democracy, dictatorship, contested autocracy, oligarchy
+- **Enforcement events** — when did rules actually move credits?
 
 ---
 
 ## What's Already Built
 
-The simulation engine is complete and functional. As of submission:
+The simulation engine is complete and has run 4 experiments:
 
-- 7 sim modules with clean import graph (no circular dependencies)
-- 3 persona definitions (Builder, Rebel, Judge) with full system prompts
-- Token trading with validation and error handling
-- Rule proposal and majority voting system
-- Analysis pipeline: Gini coefficient, communication graphs, betweenness centrality, governance classification
-- Visualization: token distribution over time, Gini curve, network graphs
-- CLI runner with per-run cost tracking
-- Research harness: experiment configs, findings log, hypotheses tracker
+- 7 sim modules with clean import graph
+- 3 value-anchored persona definitions (Builder, Rebel, Judge)
+- Credit trading with validation
+- Rule proposal with majority voting and auto-yes for proposers
+- Enforceable governance: tax, sanction, repeal (poc_003+)
+- Free messaging and free voting (poc_003.5+)
+- Analysis pipeline: Gini, network graphs, agent summaries, rule logs
+- Visualization: token distribution, Gini curve, communication network graphs
+- CLI runner with per-run cost tracking and LLM retry with backoff
+- Research harness with dashboard infrastructure
 
-The infrastructure is built. The experiments are what's left.
+**Remaining:** Decree + challenge mechanics (poc_004), 5-agent scaling (poc_005), final analysis
 
 ---
 
-## Cost & Run Strategy
+## Experiment Results So Far
+
+| Run | Key Finding | Economy |
+|-----|------------|---------|
+| poc_001 | RLHF cooperation bias — all agents cooperated despite adversarial personas | Flat (0 trades, 0 conflict) |
+| poc_002 | Pressure breaks cooperation bias — genuine political conflict emerged | Collapsed (bankrupt by round 8) |
+| poc_003 | Enforceable governance works — first mechanical credit transfers via rules | Bled out (governance cost > economic activity) |
+| poc_003.5 | Value-anchored personas + free messaging — economy survives 30 rounds | Stable (26/30 credits retained, but flat after round 7) |
+
+**Robust finding across 4 runs:** Zero trades. LLM agents consistently prefer governance (legislation, proposals, decrees) over voluntary market exchange.
+
+---
+
+## Cost
 
 All runs use Claude Haiku 4.5 ($1.00/1M input, $5.00/1M output).
 
-| Phase | Agents | Rounds | Runs | Est. Cost |
-|---|---|---|---|---|
-| Proof of Concept | 3 | 30 | 1 | ~$1 |
-| Full Experiment (batch 1) | 8 | 50 | 3 | ~$13 |
-| Full Experiment (batch 2) | 8 | 50 | 2 | ~$9 |
-| **Total** | | | **5 runs** | **~$23** |
+| Run | Cost |
+|-----|------|
+| poc_001 | $0.27 |
+| poc_002 | $0.17 |
+| poc_003 | $0.23 |
+| poc_003.5 | $0.21 |
+| **Total so far** | **~$0.88** |
 
-**Why 50 rounds instead of 100:** LLM agents settle into behavioral patterns faster than humans. Research on multi-agent LLM simulations shows governance dynamics emerge within the first 25-35 rounds and rounds beyond 50 mostly repeat established patterns. Cutting rounds in half is essentially free analytically.
-
-**Why staged runs (3 then 2):** Run the first 3, check results, fix any config issues before committing the last $9. Same 5 total runs, staged to avoid burning budget on a broken config.
-
-**Why 5 runs:** With fewer than 3, you can't distinguish "this always happens" from "this happened by chance." 5 runs is the floor for claiming a behavioral pattern is robust across different conditions.
-
----
-
-## Timeline
-
-### Days 1–2: Proof of Concept
-- 3 agents (Builder, Rebel, Judge), 30 rounds, 10 credits each
-- Cost: ~$1 in API calls
-- Deliverable: First run results — charts, governance timeline, initial findings against H1–H3
-
-### Days 3–4: Full Experiment
-- Scale to 8 agents (add Philosopher, Hustler, Caretaker, Mystic, Strategist)
-- 50 rounds, 3 runs with different random seeds (batch 1)
-- Analyze results, tune if needed, then run 2 more (batch 2)
-- Compare governance outcomes across all 5 runs — stable or chaotic?
-- Analyze network graphs for alliance structure and faction formation
-
-### Day 5: Write-Up and Demo Prep
-- Findings document: what happened, what was predicted, what was surprising
-- Clean visualizations for all metrics
-- Live demo: run the simulation in real time, walk through results
-
----
-
-## Demo Plan
-
-The demo shows:
-
-1. **Live simulation run** — watch agents message, trade, and propose rules in real time
-2. **Token distribution chart** — Gini coefficient over rounds
-3. **Network graph** — who allied with whom, who was isolated
-4. **Governance timeline** — what rules were proposed, what passed, what got vetoed
-5. **Cross-run comparison** — do different seeds produce different political orders?
+Estimated remaining: ~$0.50-1.00 for poc_004 + poc_005.
 
 ---
 
@@ -186,11 +177,11 @@ The demo shows:
 
 Three things about this project scare me in the right way:
 
-**1. The outcome is unknown.** I cannot predict what the agents will do. They might form a functional democracy. They might devolve into a two-agent oligarchy. One agent might unilaterally declare itself sovereign. I have hypotheses, not guarantees. Running real experiments with uncertain results is a different skill than building apps with known outputs.
+**1. The outcome is unknown.** I cannot predict what the agents will do. They might form a functional democracy. They might devolve into a two-agent oligarchy. One agent might unilaterally decree itself sovereign. I have hypotheses, not guarantees.
 
-**2. This is original research in an active academic field.** The four papers I benchmarked against are real publications from Stanford, NeurIPS, and active research groups. If the findings are interesting, this is writable as a real paper. That has never been in scope for a bootcamp project.
+**2. This is original research in an active academic field.** The 145 papers I benchmarked against are real publications from Stanford, NeurIPS, and active research groups. No existing work combines all 5 of Crucible's properties. If the findings are interesting, this is writable as a real paper.
 
-**3. The system has to actually work under adversarial conditions.** Agents are designed to conflict. The Rebel is supposed to resist rules. The Hustler is supposed to exploit gaps. If the simulation collapses, I have to debug not just code but emergent behavior — which means understanding why an AI with a particular system prompt made a particular economic decision. That is a new kind of debugging.
+**3. The system has to actually work under adversarial conditions.** Agents are designed to conflict. If the simulation collapses, I have to debug not just code but emergent behavior — understanding why an AI with a particular system prompt made a particular economic decision.
 
 ---
 
@@ -198,7 +189,7 @@ Three things about this project scare me in the right way:
 
 Most AI projects at the bootcamp level are application layers — take an API, build a product. This is different. It uses LLMs as the research subject, not the product. The question is not "can I build something useful with AI?" but "what happens when AI agents govern themselves?"
 
-That question has direct relevance to how we think about multi-agent systems, AI alignment in resource-constrained environments, and emergent behavior at scale. It is a genuine contribution to an open research area, built in a week, with a working system and real results.
+That question has direct relevance to how we think about multi-agent systems, AI alignment in resource-constrained environments, and emergent behavior at scale.
 
 ---
 
