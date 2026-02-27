@@ -3,11 +3,12 @@
 > Next agent: read this first, then follow the reading order below.
 
 ## Current State (updated: 2026-02-27)
-- **Phase**: PoC (~80% complete — 4 runs done, observability + visualization working, one design issue remaining)
-- **Last completed**: poc_003.5 — value-anchored personas + free messaging. Economy survived all 30 rounds (26/30 credits). Fixed network graph visualizer for free messages. Added LLM retry with backoff.
-- **Next task**: Implement emergent governance (decree + challenge) for poc_004
-- **Blockers**: None — free messaging and persona rewrite already shipped in poc_003.5
+- **Phase**: PoC (~90% complete — governance mechanics shipped, ready for capstone run)
+- **Last completed**: TASK-005 — governance config wiring. Added `proposal_threshold` end-to-end, symmetric decree penalty (decreer drops to 1 credit on successful challenge), updated prompts. Smoke tested 20 rounds, Judge decreed a tax in round 3. PR #12 merged.
+- **Next task**: TASK-006 — Run full poc_004 simulation (30 rounds), `/verify`, analyze results
+- **Blockers**: None
 - **Open PRs**: None (all merged)
+- **Active branch**: Need to create `run/poc-004-emergent-governance` from main for TASK-006
 
 ## Read These Files (in order)
 1. `AGENT.md` — gotchas, conventions, anti-patterns, decisions log, literature review findings
@@ -21,63 +22,27 @@
 - **Value-anchored personas** — shipped in poc_003.5. Personas describe what agents care about, not what to do.
 - **Free messaging** — shipped in poc_003.5. Public/private messages are free optional JSON fields, not turn-costing actions.
 - **Observability** — `analysis/narrative.py` generates agent summaries + rule logs. `analysis/visualize.py` generates token distribution, gini, and network graphs.
-- **LLM retry** — `sim/llm.py` has exponential backoff for 429/529 errors.
+- **LLM retry** — `sim/llm.py` has exponential backoff for 429/529 errors. max_tokens bumped to 2048.
+- **Governance mechanics** — decree, challenge, configurable proposal_threshold all wired end-to-end. Symmetric penalties: failed challenger AND overturned decreer both drop to 1 credit.
+- **poc_004 config** — `configs/runs/poc_004.json` ready with decree_cost=3, challenge_cost=2, proposal_threshold="majority"
 
 ---
 
-## poc_004: Emergent Governance (decree + challenge)
+## TASK-006: Run & verify poc_004
 
-**The only remaining change**: Add decree and challenge mechanics so agents can choose HOW rules are made, not just WHAT rules exist.
+**This is the only remaining task.** The code is done. Just run it.
 
-### The Problem
-The simulation hardcodes majority-vote democracy as the ONLY way to create enforceable rules. Agents choose WHAT rules exist but never choose HOW rules are made. This pre-determines the governance form.
-
-### The Fix: Three Paths to Power
-
-**Path 1 — Proposal (collective, existing, modified)**
-- `propose_rule` works as today but threshold is configurable (`"majority"` | `"unanimous"` | `"any"`)
-- Free. Requires coalition. Slower.
-
-**Path 2 — Decree (unilateral, NEW)**
-- New action: `decree` — immediately enacts an enforceable rule
-- Costs `decree_cost` credits (default: 3). No vote needed.
-- Enables dictatorship: wealthy agent can impose rules alone
-- Self-limiting: burns credits fast
-
-**Path 3 — Challenge (contesting power, NEW)**
-- New action: `challenge` — contests an active enforceable rule
-- Costs `challenge_cost` credits (default: 2). Creates a repeal vote.
-- Enables resistance: even a dictator's rules can be overturned
-
-**What emerges organically:**
-
-| Government Form | How It Emerges |
-|---|---|
-| Democracy | Agents only use `propose_rule`, nobody decrees |
-| Dictatorship | One wealthy agent decrees all rules, nobody challenges |
-| Contested Autocracy | Agent decrees, others challenge, ongoing power struggle |
-| Oligarchy | Coalition coordinates decrees, minority can't afford to challenge all |
-| Anarchy | Nobody proposes or decrees anything |
-
-### Files to Change
-1. `sim/models.py` — Add `origin`/`decreed_by` to EnforceableRule, add `decree_cost`/`challenge_cost` to Environment
-2. `sim/governance.py` — Add `enact_decree()`, `create_challenge()`, make `process_pending_votes()` threshold configurable
-3. `sim/engine.py` — Add `decree` and `challenge` branches to `apply_action()`, read new config fields
-4. `sim/prompts.py` — Add decree/challenge to action list. Present governance as neutral tools. Show `[DECREED by X]` vs `[VOTED]` tags on active enforcements.
-5. `analysis/narrative.py` — Track decree/challenge counts, add Origin column to rule log
-6. Config — Add `decree_cost`, `challenge_cost`, `proposal_threshold` fields (all backward compatible)
-
-### Key Design Principles
-- Every action must move credits or change enforceable rules (no soft signals)
-- Prompts explain mechanics neutrally — never prescribe a government form
-- Backward compatible: poc_001-003.5 configs run unchanged
-- Enforcement machinery (`enforce_rules()`) already governance-form-agnostic, no changes needed
+### Steps
+1. `git checkout main && git pull origin main && git checkout -b run/poc-004-emergent-governance`
+2. `python3 run.py --config configs/runs/poc_004.json --run-id poc_004` (30 rounds, ~5-10 min)
+3. `python3 -m analysis.narrative results/poc_004` (generates agent_summaries.md + rule_log.md)
+4. Run `/verify --skip-run --run-id poc_004` for health checks
+5. Collect results, commit to `run/poc-004-emergent-governance`, create PR
 
 ### Config
 - Agents: Builder (15), Rebel (5), Judge (10)
 - 30 rounds, seed 42, maintenance_cost=1, work_credits=1
 - decree_cost=3, challenge_cost=2, proposal_threshold="majority"
-- Branch: `run/poc-004-emergent-governance`
 
 ### Success Criteria
 
@@ -86,6 +51,10 @@ The simulation hardcodes majority-vote democracy as the ONLY way to create enfor
 | Minimum | All agents > 0 credits at round 30, total pool >= 6 credits |
 | Target | At least one enforceable rule active in final 10 rounds + at least one decree attempted |
 | Stretch | Non-democratic governance emerges (decree-based rules outnumber voted rules) |
+
+### Beckham's Notes
+- Economic scarcity pressure may feel light with maintenance_cost=1 / work_credits=1. Watch for this in results — if no pressure, consider adjusting for a follow-up run.
+- If agents never decree, that's a finding, not a bug.
 
 ---
 
@@ -122,6 +91,7 @@ The simulation hardcodes majority-vote democracy as the ONLY way to create enfor
 - **Decree/challenge over declare_authority/submit_to/endorse/oppose** — every action must move credits or change rules, no soft signals
 - **Governance form is NOT pre-built** — agents discover it through tool usage. Prompts never say "democracy" or "dictatorship."
 - **Separate PRs for bug fixes vs experiment runs** — don't bundle code changes with run results
+- **Symmetric decree penalty** — decreer drops to 1 credit if decree is successfully challenged (matching failed-challenger penalty)
 
 ## PoC Completion Tracker
 
@@ -134,15 +104,16 @@ The simulation hardcodes majority-vote democracy as the ONLY way to create enfor
 | Literature review (145 papers, novelty confirmed) | Done (session 5) |
 | Value-anchored personas + free messaging | Done (poc_003.5, session 7) |
 | Economy sustains for full 30 rounds | Done (poc_003.5 — 26/30 credits retained) |
-| Emergent governance system (decree + challenge) | **NOT YET** — next task |
-| Capstone run with emergent governance | **NOT YET** — poc_004 |
-| Coalition dynamics with shifting alliances | **NOT YET** — poc_005 targets this |
+| Emergent governance system (decree + challenge) | **Done (session 8 — TASK-005, PR #12)** |
+| Capstone run with emergent governance | **NOT YET — TASK-006, run poc_004** |
+| Coalition dynamics with shifting alliances | NOT YET — poc_005 targets this |
 | Final analysis and writeup | NOT YET |
 
 ## Standard Workflow
 `/plan` → `/preflight` → `/ship` (repeat) → `/verify` → review results → document findings → `/pr`
 
 - `/plan` defines success criteria in task files (acceptance criteria must be mechanically evaluable from data)
+- `/preflight` reviews plan against codebase, proposes fixes for gaps — run between `/plan` and `/ship`
 - `/ship` implements tasks one at a time; suggests `/verify` when the last task completes
 - `/verify` runs the simulation, performs 5 health checks (completion, parse errors, economy, governance, data integrity), evaluates acceptance criteria, produces a PASS/WARN/FAIL verdict. Results stored in `results/<run_id>/verification.json`.
 - Beckham reviews verification results, directs findings documentation
@@ -160,7 +131,7 @@ The simulation hardcodes majority-vote democracy as the ONLY way to create enfor
 - Don't say "democracy" or "dictatorship" in prompts — describe mechanics only
 - Don't write action-prescriptive personas — tell agents WHAT THEY CARE ABOUT, not WHAT TO DO
 - Don't skew personas toward legislation over trade — all available actions should have equal prompt real estate
-- Don't re-implement free messaging or persona rewrites — already shipped in poc_003.5
+- Don't re-implement free messaging, persona rewrites, or governance mechanics — already shipped
 
 ## Session History
 - Session 1: Verified experiment novelty, scaffolded repo, built simulation engine, ran poc_001 (cooperative consensus — no conflict)
@@ -170,3 +141,4 @@ The simulation hardcodes majority-vote democracy as the ONLY way to create enfor
 - Session 5: Literature review (145 papers). Confirmed novelty. Discovered governance form pre-determination flaw. Designed decree/challenge system.
 - Session 6: Adversarial lit review verification. Discovered persona prompt bias. Designed value-anchored persona rewrite.
 - Session 7: Implemented value-anchored personas + free messaging. Ran poc_003.5 — economy survived all 30 rounds, minimal governance (2 proposals), heavy free messaging (93 messages). Fixed network graph visualizer for free messages. Added LLM retry with backoff. Cleaned up stale docs.
+- Session 8: Wired governance config (proposal_threshold, decree_cost, challenge_cost). Added symmetric decree penalty. Bumped LLM max_tokens 1024→2048. Created /preflight skill for plan review. Smoke tested 20 rounds — Judge decreed immediately. TASK-005 done (PR #12), TASK-006 (run poc_004) ready to execute.
