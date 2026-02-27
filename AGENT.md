@@ -4,7 +4,7 @@
 > discover something that would save a future agent time.
 
 ## Project Conventions
-- One model (Claude 3.5 Haiku) for all agent personas — personas come from system prompts, not different models
+- One model (Claude Haiku 4.5 — `claude-haiku-4-5-20251001`) for all agent personas — personas come from system prompts, not different models
 - Credits are fake currency (not API tokens) — fixed pool, zero-sum
 - Results are immutable after analysis — iterate by creating new runs, not editing old ones
 - findings/log.md is append-only
