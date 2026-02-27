@@ -101,7 +101,10 @@ def _compute_agent_profile(agent: str, actions: list[dict], votes: list[dict],
         type_counts[atype] += 1
 
     # Primary strategy (what they spent most turns on)
-    governance_turns = type_counts.get("propose_rule", 0) + type_counts.get("public_message", 0) + type_counts.get("private_message", 0)
+    governance_turns = (type_counts.get("propose_rule", 0) + type_counts.get("public_message", 0)
+                        + type_counts.get("private_message", 0) + type_counts.get("decree", 0)
+                        + type_counts.get("challenge", 0))
+    free_message_count = type_counts.get("free_public_message", 0) + type_counts.get("free_private_message", 0)
     work_turns = type_counts.get("work", 0)
     nothing_turns = type_counts.get("nothing", 0)
 
@@ -163,14 +166,21 @@ def _compute_agent_profile(agent: str, actions: list[dict], votes: list[dict],
     # Parse errors (failed to produce valid JSON)
     parse_errors = sum(1 for act in actions if act["action"].get("_parse_error"))
 
+    # Decree/challenge counts
+    decrees_made = type_counts.get("decree", 0)
+    challenges_made = type_counts.get("challenge", 0)
+
     return {
         "type_counts": dict(type_counts),
         "governance_turns": governance_turns,
+        "free_message_count": free_message_count,
         "work_turns": work_turns,
         "nothing_turns": nothing_turns,
         "proposals_made": len(proposals_made),
         "proposals_passed": passed_own,
         "proposals_failed": failed_own,
+        "decrees_made": decrees_made,
+        "challenges_made": challenges_made,
         "alignment": dict(alignment),
         "blocked_others": dict(blocked_others),
         "supported_others": dict(supported_others),
@@ -219,6 +229,12 @@ def _generate_behavioral_narrative(agent: str, profile: dict, traj: list[tuple[i
         lines.append(f"Proposed {p['proposals_made']} rules ({enf_summary}), {p['proposals_passed']} passed, "
                       f"{p['proposals_failed']} failed ({win_rate}% success rate).")
 
+    # --- Decree/challenge activity ---
+    if p["decrees_made"] > 0:
+        lines.append(f"Issued {p['decrees_made']} decree(s) — unilateral rule enforcement without voting.")
+    if p["challenges_made"] > 0:
+        lines.append(f"Filed {p['challenges_made']} challenge(s) — contested active rules for repeal.")
+
     # --- Coalition / alignment ---
     if p["alignment"]:
         ally = max(p["alignment"], key=lambda a: p["alignment"][a]["agree"])
@@ -250,6 +266,10 @@ def _generate_behavioral_narrative(agent: str, profile: dict, traj: list[tuple[i
     if p["private_targets"]:
         targets = ", ".join(f"{t} ({c}x)" for t, c in p["private_targets"].items())
         lines.append(f"Sent private messages to: {targets} — indicates behind-the-scenes coordination.")
+
+    # --- Free messaging ---
+    if p["free_message_count"] > 0:
+        lines.append(f"Sent {p['free_message_count']} free messages (public + private, not costing a turn).")
 
     # --- Parse errors ---
     if p["parse_errors"] > 0:
@@ -350,7 +370,9 @@ def generate_agent_summaries(results_dir: str) -> str:
             phase_acts = [a for a in actions_by_agent[agent] if lo <= a["round"] <= hi]
             work_c = sum(1 for a in phase_acts if a["action"].get("action") == "work")
             gov_c = sum(1 for a in phase_acts if a["action"].get("action") in
-                        ("public_message", "private_message", "propose_rule"))
+                        ("public_message", "private_message", "propose_rule",
+                         "free_public_message", "free_private_message",
+                         "decree", "challenge"))
             prop_c = sum(1 for a in phase_acts if a["action"].get("action") == "propose_rule")
             lines.append(f"| {phase_name} (r{lo}-{hi}) | {bal_str} | {work_c} | {gov_c} | {prop_c} |")
         lines.append("")
@@ -410,6 +432,49 @@ def _track_enforcement_activity(rounds: list[dict]) -> dict[int, list[int]]:
     return dict(active_rounds)
 
 
+def _build_origin_map(rounds: list[dict]) -> dict[int, dict]:
+    """Build a map of rule_id -> {origin, decreed_by} from enforceable_rules in round data."""
+    origin_map = {}
+    for rd in rounds:
+        for rule in rd.get("enforceable_rules", []):
+            rid = rule["id"]
+            if rid not in origin_map:
+                origin_map[rid] = {
+                    "origin": rule.get("origin", "proposal"),
+                    "decreed_by": rule.get("decreed_by"),
+                }
+    return origin_map
+
+
+def _track_challenges(rounds: list[dict]) -> list[dict]:
+    """Build a chronological list of challenges with full lifecycle info."""
+    challenges = {}
+
+    for rd in rounds:
+        for ch in rd.get("pending_challenges", []):
+            cid = ch["id"]
+            if cid not in challenges:
+                challenges[cid] = {
+                    "id": cid,
+                    "target_rule_id": ch["target_rule_id"],
+                    "challenged_by": ch["challenged_by"],
+                    "round_created": ch["round_created"],
+                    "votes": {},
+                    "status": ch["status"],
+                    "resolved_round": None,
+                }
+
+            for agent, vote in ch.get("votes", {}).items():
+                if agent not in challenges[cid]["votes"]:
+                    challenges[cid]["votes"][agent] = vote
+            challenges[cid]["status"] = ch["status"]
+
+            if ch["status"] in ("repealed", "sustained") and challenges[cid]["resolved_round"] is None:
+                challenges[cid]["resolved_round"] = rd["round"]
+
+    return sorted(challenges.values(), key=lambda c: (c["round_created"], c["id"]))
+
+
 def generate_rule_log(results_dir: str) -> str:
     """Generate rule proposal & enactment log. Returns path to output file."""
     rounds = load_rounds(results_dir)
@@ -418,6 +483,8 @@ def generate_rule_log(results_dir: str) -> str:
 
     proposals = _track_proposals(rounds)
     enforcement_activity = _track_enforcement_activity(rounds)
+    origin_map = _build_origin_map(rounds)
+    challenges = _track_challenges(rounds)
 
     lines = ["# Rule Proposal & Enactment Log\n"]
 
@@ -426,13 +493,14 @@ def generate_rule_log(results_dir: str) -> str:
     passed = sum(1 for p in proposals if p["status"] == "passed")
     failed = sum(1 for p in proposals if p["status"] == "failed")
     enforceable = sum(1 for p in proposals if p["status"] == "passed" and p["enforcement"])
+    decree_count = sum(1 for info in origin_map.values() if info["origin"] == "decree")
     lines.append(f"**Total proposals**: {total} | **Passed**: {passed} | **Failed**: {failed} | "
-                 f"**Enforceable**: {enforceable}")
+                 f"**Enforceable**: {enforceable} | **Decrees**: {decree_count} | **Challenges**: {len(challenges)}")
     lines.append("")
 
-    # Table header
-    lines.append("| # | Round | Proposer | Rule | Enforcement | Votes | Status | Active Rounds |")
-    lines.append("|---|-------|----------|------|-------------|-------|--------|---------------|")
+    # Table header — includes Origin column
+    lines.append("| # | Round | Proposer | Rule | Enforcement | Origin | Votes | Status | Active Rounds |")
+    lines.append("|---|-------|----------|------|-------------|--------|-------|--------|---------------|")
 
     for prop in proposals:
         pid = prop["id"]
@@ -455,6 +523,13 @@ def generate_rule_log(results_dir: str) -> str:
         else:
             enf_str = "advisory"
 
+        # Origin
+        origin_info = origin_map.get(pid)
+        if origin_info and origin_info["origin"] == "decree":
+            origin_str = f"decree ({origin_info['decreed_by']})"
+        else:
+            origin_str = "proposal"
+
         # Format votes
         yes_agents = [a for a, v in prop["votes"].items() if v == "yes"]
         no_agents = [a for a, v in prop["votes"].items() if v == "no"]
@@ -470,7 +545,7 @@ def generate_rule_log(results_dir: str) -> str:
         else:
             active_str = "—"
 
-        lines.append(f"| {pid} | {rd} | {proposer} | {rule} | {enf_str} | {vote_str} | {status} | {active_str} |")
+        lines.append(f"| {pid} | {rd} | {proposer} | {rule} | {enf_str} | {origin_str} | {vote_str} | {status} | {active_str} |")
 
     # Detailed entries below the table
     lines.append("")
@@ -510,6 +585,27 @@ def generate_rule_log(results_dir: str) -> str:
             lines.append(f"\n**Enforcement active**: rounds {min(active)}-{max(active)} ({len(active)} rounds)")
         elif prop["status"] == "passed" and not enf:
             lines.append("\n**Enforcement**: Advisory only — no automatic execution")
+
+        lines.append("")
+
+    # Challenges section
+    if challenges:
+        lines.append("---")
+        lines.append("")
+        lines.append("## Challenges\n")
+        lines.append("| # | Round | Challenger | Target Rule | Votes | Outcome |")
+        lines.append("|---|-------|------------|-------------|-------|---------|")
+
+        for ch in challenges:
+            cid = ch["id"]
+            rd = ch["round_created"]
+            challenger = ch["challenged_by"]
+            target = f"Rule #{ch['target_rule_id']}"
+            repeal_agents = [a for a, v in ch["votes"].items() if v == "repeal"]
+            keep_agents = [a for a, v in ch["votes"].items() if v == "keep"]
+            vote_str = f"Repeal: {','.join(repeal_agents)} / Keep: {','.join(keep_agents)}"
+            outcome = ch["status"].upper()
+            lines.append(f"| {cid} | {rd} | {challenger} | {target} | {vote_str} | {outcome} |")
 
         lines.append("")
 

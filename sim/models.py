@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -21,6 +23,18 @@ class EnforceableRule:
     text: str  # Human-readable rule text
     enforcement: dict  # {"type": "tax"|"sanction"|"repeal", ...params}
     enacted_round: int
+    origin: str = "proposal"  # "proposal" | "decree"
+    decreed_by: str | None = None  # agent name if decree
+
+
+@dataclass
+class Challenge:
+    id: int  # Shares proposal_counter for unique IDs
+    target_rule_id: int
+    challenged_by: str
+    round_created: int
+    votes: dict = field(default_factory=dict)  # {name: "repeal"/"keep"}
+    status: str = "pending"  # "pending" | "repealed" | "sustained"
 
 
 @dataclass
@@ -55,3 +69,6 @@ class Environment:
     interactions: list = field(default_factory=list)  # [{from, to, type, round}] for network analysis
     maintenance_cost: int = 0  # Credits deducted per agent per round
     work_credits: int = 0  # Credits earned per work action
+    pending_challenges: list = field(default_factory=list)  # List of Challenge objects
+    decree_cost: int = 0  # 0 = disabled
+    challenge_cost: int = 0  # 0 = disabled
