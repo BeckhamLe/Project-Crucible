@@ -12,6 +12,7 @@
     "maintenance_cost": 1,
     "work_credits": 1,
     "decree_cost": 3,
-    "challenge_cost": 2
+    "challenge_cost": 2,
+    "proposal_threshold": "majority"
   }
 }

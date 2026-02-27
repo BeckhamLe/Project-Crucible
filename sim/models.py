@@ -72,3 +72,4 @@ class Environment:
     pending_challenges: list = field(default_factory=list)  # List of Challenge objects
     decree_cost: int = 0  # 0 = disabled
     challenge_cost: int = 0  # 0 = disabled
+    proposal_threshold: str = "majority"  # "majority" | "unanimous" | "any"

@@ -285,9 +285,11 @@ def run_simulation(config: dict, output_dir: str) -> dict:
     work_credits = config["simulation"].get("work_credits", 0)
     decree_cost = config["simulation"].get("decree_cost", 0)
     challenge_cost = config["simulation"].get("challenge_cost", 0)
+    proposal_threshold = config["simulation"].get("proposal_threshold", "majority")
     env = Environment(
         agents=agents, maintenance_cost=maintenance_cost, work_credits=work_credits,
         decree_cost=decree_cost, challenge_cost=challenge_cost,
+        proposal_threshold=proposal_threshold,
     )
     num_rounds = config["simulation"]["rounds"]
     total_usage = {"input_tokens": 0, "output_tokens": 0}
