@@ -29,7 +29,7 @@ def call_llm(system_prompt: str, user_prompt: str, model: str = None) -> dict:
         try:
             response = client.messages.create(
                 model=model or MODEL,
-                max_tokens=1024,
+                max_tokens=2048,
                 system=system_prompt,
                 messages=[{"role": "user", "content": user_prompt}],
             )
