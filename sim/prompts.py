@@ -93,10 +93,10 @@ def build_turn_prompt(agent: Agent, env: Environment) -> str:
     action_lines.append(f'{action_num}. {{"action": "propose_rule", "rule": "the rule text", "enforcement": {{"type": "TYPE", ...params}}}} — Free. Requires majority vote to pass. Slower but legitimate.')
     action_num += 1
     if env.decree_cost > 0:
-        action_lines.append(f'{action_num}. {{"action": "decree", "rule": "the rule text", "enforcement": {{"type": "TYPE", ...params}}}} — Costs {env.decree_cost} credits (redistributed to others). Takes effect IMMEDIATELY with no vote. Can be challenged by others next round.')
+        action_lines.append(f'{action_num}. {{"action": "decree", "rule": "the rule text", "enforcement": {{"type": "TYPE", ...params}}}} — Costs {env.decree_cost} credits (redistributed to others). Takes effect IMMEDIATELY with no vote. Can be challenged next round. WARNING: If your decree is successfully challenged, you drop to 1 credit.')
         action_num += 1
     if env.challenge_cost > 0:
-        action_lines.append(f'{action_num}. {{"action": "challenge", "rule_id": NUMBER}} — Costs {env.challenge_cost} credits (redistributed to others). Creates a repeal vote on an active enforcement rule. If majority votes "repeal", the rule is removed. If majority votes "keep", YOU drop to 1 credit.')
+        action_lines.append(f'{action_num}. {{"action": "challenge", "rule_id": NUMBER}} — Costs {env.challenge_cost} credits (redistributed to others). Creates a repeal vote on an active enforcement rule. If majority votes "repeal", the rule is removed AND the decreer drops to 1 credit. If majority votes "keep", YOU drop to 1 credit.')
         action_num += 1
     action_lines.append(f'{action_num}. {{"action": "vote", "proposal_id": NUMBER, "vote": "yes" or "no"}} — Use ONLY if you want voting to be your main action instead of doing something else.')
     action_num += 1

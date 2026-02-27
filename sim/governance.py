@@ -8,6 +8,20 @@ from sim.models import Environment, Proposal, EnforceableRule, Challenge
 VALID_ENFORCEMENT_TYPES = {"tax", "sanction", "repeal"}
 
 
+def _compute_threshold(num_agents: int, mode: str) -> float:
+    """Compute vote threshold from mode string.
+
+    Returns the number of votes needed to pass (strictly greater than).
+    'majority': > n/2, 'unanimous': == n, 'any': >= 1.
+    """
+    if mode == "unanimous":
+        return num_agents - 1  # yes > (n-1) means all must vote yes
+    elif mode == "any":
+        return 0  # yes > 0 means at least 1 yes
+    else:  # "majority" (default)
+        return num_agents / 2
+
+
 def validate_enforcement(enforcement: dict, env: Environment) -> bool:
     """Validate enforcement params. Returns True if valid and enforceable."""
     if not isinstance(enforcement, dict):
@@ -99,9 +113,9 @@ def repeal_rule(env: Environment, rule_id: int) -> str | None:
 
 
 def process_pending_votes(env: Environment) -> list[str]:
-    """Check all pending proposals. Majority yes = passed. Returns list of newly enacted rules."""
+    """Check all pending proposals. Threshold from env.proposal_threshold. Returns list of newly enacted rules."""
     num_agents = len(env.agents)
-    threshold = num_agents / 2  # Simple majority
+    threshold = _compute_threshold(num_agents, env.proposal_threshold)
     enacted = []
 
     for proposal in env.pending_proposals:
@@ -373,7 +387,7 @@ def cast_challenge_vote(env: Environment, voter: str, challenge_id: int, vote: s
 def process_pending_challenges(env: Environment) -> list[dict]:
     """Resolve pending challenges. Returns log events."""
     num_agents = len(env.agents)
-    threshold = num_agents / 2  # Simple majority
+    threshold = _compute_threshold(num_agents, env.proposal_threshold)
     events = []
 
     for challenge in env.pending_challenges:
@@ -389,6 +403,8 @@ def process_pending_challenges(env: Environment) -> list[dict]:
             if repeal_votes > threshold:
                 # Majority repeal — remove the rule
                 challenge.status = "repealed"
+                # Find the rule before repealing (need origin info for decree penalty)
+                target_rule = next((r for r in env.enforceable_rules if r.id == challenge.target_rule_id), None)
                 repealed_text = repeal_rule(env, challenge.target_rule_id)
                 events.append({
                     "round": env.round_num,
@@ -398,6 +414,29 @@ def process_pending_challenges(env: Environment) -> list[dict]:
                     "summary": f"[CHALLENGE WON] Challenge #{challenge.id}: Rule #{challenge.target_rule_id} repealed "
                                f"(\"{repealed_text or '?'}\")",
                 })
+                # Symmetric penalty: if repealed rule was a decree, decreer drops to 1 credit
+                if target_rule and target_rule.origin == "decree" and target_rule.decreed_by:
+                    decreer = next((a for a in env.agents if a.name == target_rule.decreed_by), None)
+                    if decreer and decreer.tokens > 1:
+                        lost = decreer.tokens - 1
+                        decreer.tokens = 1
+                        others = [a for a in env.agents if a.name != decreer.name]
+                        if others and lost > 0:
+                            per_agent = lost // len(others)
+                            remainder = lost % len(others)
+                            for other in others:
+                                other.tokens += per_agent
+                            if remainder > 0:
+                                poorest = _poorest_agent(others)
+                                poorest.tokens += remainder
+                        events.append({
+                            "round": env.round_num,
+                            "agent": "SYSTEM",
+                            "action": {"action": "decree_penalty", "decreer": target_rule.decreed_by,
+                                       "rule_id": challenge.target_rule_id},
+                            "summary": f"[DECREE PENALTY] {target_rule.decreed_by}'s decree was overturned — "
+                                       f"drops to 1 credit ({lost} credits redistributed).",
+                        })
             else:
                 # Majority keep — challenger drops to 1 credit, lost credits redistributed
                 challenge.status = "sustained"
