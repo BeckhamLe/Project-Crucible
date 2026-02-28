@@ -327,3 +327,72 @@ Zero decrees, zero challenges. Democracy remained the only governance form used.
 **Confidence**: High that 5 agents produces more interesting early dynamics (coalition instability, first trade). But the lock-in problem persists — coalitions still stabilize quickly. Need mechanic changes (decree rebalancing, interdependence) to sustain dynamic governance beyond the opening rounds.
 
 ---
+
+## [poc_006] 2026-02-27 — Extraction Test: decree-exclusive extraction + tax even-split fix
+
+**Config**: 5 agents (Builder=15, Merchant=12, Judge=10, Populist=8, Rebel=5), 30 rounds, maintenance_cost=1, work_credits=1, decree_cost=3, challenge_cost=2, proposal_threshold="majority", seed 42. Same config as poc_005. Only code change: decrees can now use `extraction` enforcement (revenue → decreer); proposals cannot. Tax enforcement fixed to even-split among recipients.
+**Cost**: $0.37 (est.)
+
+**Hypothesis tested**: H11 (Decree-exclusive extraction makes decrees viable — agents will use decrees when they can capture revenue)
+
+### What Happened
+
+Populist proposed a Wealth Stabilization Tax (threshold=12, amount=1) in round 1. Passed 3-2 — Populist+Judge+Rebel YES, Builder+Merchant NO. Same poor-vs-rich split as poc_005's opening. The tax enforcement even-split worked correctly: Builder (the only agent above 12) paid 1 credit/round redistributed to agents below 8 (Populist and Rebel).
+
+Judge proposed an amendment in round 11, lowering the redistribution threshold from "below 8" to "at or below 6." It passed **5-0 unanimous** — Builder and Merchant both flipped to YES. This is notable: the wealthy agents agreed to refine redistribution once the initial rule was already working and their own positions had stabilized.
+
+After round 12, the economy completely froze. Builder settled at 13 (above threshold, still paying tax), but the tax recipient pool was empty (Populist=6, Rebel=7, both above the amended threshold of 6). All agents worked every round. No new governance. No trades. No decrees. 18 rounds of pure work + messaging stasis.
+
+**Zero decrees in 30 rounds.** The primary experimental variable — extraction — was never attempted by any agent.
+
+### Key Metrics
+
+| Metric | Value |
+|---|---|
+| Final balances | Builder=13, Merchant=10, Judge=9, Populist=6, Rebel=7 |
+| Credits retained | 45/50 (90%) |
+| Governance type | Democratic welfare state |
+| Rules enacted | 2 (both enforceable tax, via proposal) |
+| Total proposals | 2 (both passed) |
+| Decrees | 0 |
+| Challenges | 0 |
+| Trades | 0 |
+| Extraction attempts | 0 |
+| Work actions | 145/150 turns (97%) |
+| Free messages | 144 (118 public + 26 private) |
+| Parse errors | 3/308 (1.0%) |
+
+### Hypothesis Results
+
+- **H11: NOT CONFIRMED** — Zero decrees attempted. Zero extraction attempts. Agents had the extraction mechanic available for 30 rounds and never touched it. All governance was democratic. Extraction alone is not sufficient to make decrees viable.
+
+### Key Findings
+
+1. **Extraction didn't change the decree calculus.** The payoff side was improved (keep the revenue yourself), but the risk side is unchanged (3 credit cost + drop to 1 if challenged). With challenge_cost=2, any two agents can overturn a decree for a combined 4 credits while the decreer risks everything. The expected value is still deeply negative. **The barrier to decrees is risk, not payoff.**
+
+2. **Democracy convergence is now a 7-run finding.** Across poc_001 through poc_006, agents have used democratic proposals as the exclusive governance mechanism (one defensive decree repeal in poc_004 aside). This is not a fluke — LLM agents consistently choose the lowest-risk governance path regardless of available alternatives. Democracy is the attractor state.
+
+3. **Unanimous amendment is new behavior.** The R11 vote (5-0) is the first unanimous governance action in a run that started with a contested vote (3-2). Builder and Merchant opposed the original tax but agreed to refine it once it was established. This suggests LLM agents accept the legitimacy of enacted rules even when they voted against them — a form of institutional respect.
+
+4. **Tax even-split working correctly.** Builder paid 1/round above threshold 12, split evenly among eligible recipients. The fix from session 10 is mechanically sound. But the tax became inert once recipients climbed above the amended threshold — same "legislating for an economy that no longer exists" pattern from poc_003.
+
+5. **Economic stasis is the dominant late-game pattern.** Rounds 12-29 (60% of the simulation) had zero economic activity beyond work. Balances didn't change. No governance. No trades. Once agents reach a stable work-every-round equilibrium, nothing disrupts it. This confirms the economic interdependence item from the backlog — agents need a reason why "just work" isn't sufficient.
+
+6. **Zero trades, 7th run.** Only poc_005 has ever produced a trade (Merchant's failed bribe). Trade aversion is the most robust behavioral finding across all Crucible runs.
+
+7. **Messaging volume stayed high even during stasis.** 144 messages in 30 rounds. Agents kept talking politics (inequality, fairness, system design) for 18 rounds where nothing actually happened. Free messaging may be a pressure valve — agents satisfy their persona-driven urges through rhetoric without taking costly governance actions.
+
+### What This Means for the Research
+
+The decree rebalancing hypothesis is closed. Extraction alone doesn't make decrees viable because the fundamental issue is **asymmetric risk**: a decree costs 3 credits and risks ruin, while a proposal costs nothing (free voting) and achieves the same democratic outcome. No amount of payoff improvement fixes the risk asymmetry.
+
+The remaining levers to break the democratic equilibrium are:
+1. **Economic interdependence** — make "just work" insufficient so agents need to interact. If solo work can't sustain, governance becomes the only path to surplus, and decrees become rational when you can't get majority support.
+2. **Lower decree cost or higher challenge cost** — change the risk math directly. But this is parameter tuning, not a mechanic insight.
+3. **Crisis events** — external shocks that force collective action and create windows where unilateral decree is faster than democratic process.
+
+Economic interdependence is the strongest candidate because it addresses the root cause: agents have no reason to interact after initial governance. The stasis pattern (18 rounds of pure work) is the symptom.
+
+**Confidence**: High that extraction alone is insufficient. The decree barrier is structural (risk asymmetry), not incentive-based. Economic interdependence is the next lever to test.
+
+---

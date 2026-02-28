@@ -1,0 +1,45 @@
+{
+  "run_id": "poc_006",
+  "config": "configs/runs/poc_006.json",
+  "timestamp": "2026-02-27T22:30:00Z",
+  "verdict": "WARN",
+  "health_checks": {
+    "simulation_complete": {
+      "status": "PASS",
+      "detail": "30/30 rounds completed"
+    },
+    "parse_error_rate": {
+      "status": "PASS",
+      "detail": "3/308 actions (1.0%)",
+      "rate": 0.01
+    },
+    "economic_viability": {
+      "status": "PASS",
+      "detail": "Pool: 45 credits (started 50). All agents > 0. Rebel gained +2 (net beneficiary of tax). Builder lost 2 to tax enforcement."
+    },
+    "governance_activity": {
+      "status": "PASS",
+      "detail": "2 proposals (both passed). 0 decrees, 0 challenges, 0 trades. Democracy dominated again."
+    },
+    "data_integrity": {
+      "status": "PASS",
+      "detail": "All 30 rounds valid JSON with correct sequential numbering and required fields."
+    }
+  },
+  "hypothesis_evaluation": {
+    "H11": {
+      "prediction": "Decree-exclusive extraction makes decrees viable — agents will use decrees when they can capture revenue",
+      "result": "NOT CONFIRMED",
+      "detail": "Zero decrees attempted in 30 rounds. Zero extraction attempts. All governance was democratic (2 proposals, 2 passed). Agents chose tax-based redistribution via majority vote. Extraction mechanic was available but completely ignored."
+    }
+  },
+  "key_observations": {
+    "decree_usage": "0 decrees in 30 rounds — same as poc_005. Extraction did not change decree viability.",
+    "governance_pattern": "Populist proposed redistributive tax (R1, passed 3-2). Judge amended it (R11, passed 5-0 unanimous). Both were democratic proposals with tax enforcement. No agent attempted extraction.",
+    "coalition_dynamics": "R1 vote split: Populist+Judge+Rebel (YES) vs Builder+Merchant (NO) — same poor-vs-rich split as poc_005. R11 amendment passed unanimously — Builder and Merchant flipped to YES.",
+    "economic_stasis": "Economy froze after R12. Balances unchanged for 18 rounds. All agents worked every round. No trades. Tax stopped firing once Builder dropped below threshold (13 < 12 is false — actually Builder stayed at 13, threshold is >12 so 13>12=true... need to check).",
+    "extraction_ignored": "The primary experimental variable (extraction) was never tested by agents. The mechanic exists but agents never attempted to use it.",
+    "zero_trades": "7th consecutive run with zero trades (poc_005 had 1). Trade aversion is the most robust finding across all runs.",
+    "messaging_heavy": "144 free messages (118 public + 26 private). Agents prefer communication over economic or governance actions."
+  }
+}
