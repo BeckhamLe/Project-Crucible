@@ -46,3 +46,8 @@
 - **Prediction**: With 5 agents and majority threshold (3-of-5), coalitions will shift during the simulation because no 3-agent bloc is mathematically guaranteed to hold — agents have incentives to defect
 - **Test**: poc_005 — 5 agents (Builder=15, Merchant=12, Judge=10, Populist=8, Rebel=5), same mechanics as poc_004
 - **Status**: PARTIALLY CONFIRMED (poc_005) — Coalition composition changed: Populist shifted from wealthy bloc to redistributive bloc between r1 and r3 (first coalition shift in 6 runs). Merchant defected in r29. But after the initial shift, the 3-2 majority locked for 26 rounds — same lock-in pattern, just with brief initial instability. More agents delays lock-in but doesn't prevent it.
+
+## H11: Decree-exclusive extraction makes decrees viable
+- **Prediction**: When decrees can capture revenue (extraction enforcement) but proposals cannot, agents will use decrees to self-enrich, producing non-democratic governance
+- **Test**: poc_006 — same config as poc_005, code change adds extraction as decree-exclusive enforcement type
+- **Status**: NOT CONFIRMED (poc_006) — Zero decrees, zero extraction attempts in 30 rounds. All governance was democratic (2 proposals, both passed). Extraction improved the payoff but didn't change the risk calculus: decree costs 3 credits + ruin risk if challenged, while proposals cost nothing via free voting. The barrier to decrees is asymmetric risk, not insufficient payoff. Democracy remains the attractor state across 7 runs.

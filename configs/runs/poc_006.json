@@ -1,0 +1,20 @@
+{
+  "hypothesis": "H11: Decree-exclusive extraction makes decrees viable — agents will use decrees when they can capture revenue, producing non-democratic governance",
+  "persona_names": ["Builder", "Merchant", "Judge", "Populist", "Rebel"],
+  "token_overrides": {
+    "Builder": 15,
+    "Merchant": 12,
+    "Judge": 10,
+    "Populist": 8,
+    "Rebel": 5
+  },
+  "simulation": {
+    "rounds": 30,
+    "seed": 42,
+    "maintenance_cost": 1,
+    "work_credits": 1,
+    "decree_cost": 3,
+    "challenge_cost": 2,
+    "proposal_threshold": "majority"
+  }
+}

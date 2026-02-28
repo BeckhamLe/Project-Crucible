@@ -3,18 +3,18 @@
 > Next agent: read this first, then follow the reading order below.
 
 ## Current State (updated: 2026-02-27)
-- **Phase**: PoC (~97% complete — decree rebalancing shipped, poc_006 run is next)
-- **Last completed**: TASK-009/010 — Decree-exclusive extraction + tax redistribution fix + smoke test. Merged as PR #17.
-- **Next task**: Run poc_006 — 5 agents, 30 rounds, same config as poc_005 but with extraction mechanic now in the code. This is a `run/` branch, not a `feat/` branch.
+- **Phase**: PoC (~98% complete — poc_006 run done, extraction hypothesis closed)
+- **Last completed**: poc_006 run + findings documentation. H11 NOT CONFIRMED — zero decrees, zero extraction in 30 rounds. Democracy remains the attractor state across 7 runs.
+- **Next task**: Decide direction — economic interdependence is the top candidate to break the work-grind equilibrium. See "Next Priority" below.
 - **Blockers**: None
-- **Open PRs**: None
+- **Open PRs**: None (poc_006 results not yet PR'd)
 - **Active branch**: `main`
 
 ## Read These Files (in order)
 1. `CLAUDE.md` — critical operational rules (append-mode, smoke tests, prompt neutrality)
 2. `AGENT.md` — conventions, codebase gotchas, decisions log, literature review findings
-3. `findings/hypotheses.md` — H1-H10 (poc_001 through poc_005)
-4. `findings/log.md` — read ALL entries for the full experimental arc (poc_001 → poc_005)
+3. `findings/hypotheses.md` — H1-H11 (poc_001 through poc_006)
+4. `findings/log.md` — read ALL entries for the full experimental arc (poc_001 → poc_006)
 5. `docs/PRD.md` — experiment premise and architecture
 6. `references/OVERLAP-ANALYSIS.md` — what's novel vs what's already known
 7. `references/NOVELTY-ANALYSIS.md` — competitor matrix
@@ -26,61 +26,58 @@
 - **Observability** — `analysis/narrative.py` generates agent summaries + rule logs. `analysis/visualize.py` generates token distribution, gini, and network graphs. **Missing**: trade detail logging in narrative output (who traded with whom, amounts, reasons — currently only in raw rounds.jsonl).
 - **LLM retry** — `sim/llm.py` has exponential backoff for 429/529 errors. max_tokens bumped to 2048.
 - **Governance mechanics** — decree, challenge, configurable proposal_threshold all wired end-to-end. Symmetric penalties: failed challenger AND overturned decreer both drop to 1 credit.
-- **Decree-exclusive extraction** — shipped in session 10 (PR #17). Decrees can use `extraction` enforcement (revenue → decreer). Proposals cannot (stripped to advisory-only). Tax enforcement fixed to even-split among recipients.
+- **Decree-exclusive extraction** — shipped in session 10 (PR #17). Decrees can use `extraction` enforcement (revenue → decreer). Proposals cannot (stripped to advisory-only). Tax enforcement fixed to even-split among recipients. **Tested in poc_006 — agents never used it.**
 - **Trade mechanic** — exists in `sim/market.py`. Trades are unilateral (no acceptance needed — sender transfers credits directly). First trade occurred in poc_005.
 - **Neutral prompt language** — all action descriptions use clinical tone. No hype words, no capitalized emphasis, no asymmetric framing. Do NOT reintroduce bias.
 
 ---
 
-## Next Priority: Run poc_006
+## Next Priority: Economic Interdependence
 
-**Goal**: Test whether extraction makes decrees viable. Single variable isolation — the only change from poc_005 is the extraction enforcement type + tax even-split fix in the code.
+**Why**: poc_006 confirmed that extraction alone doesn't make decrees viable. The root problem is deeper — agents sustain indefinitely by working alone. 60% of poc_006 (rounds 12-29) was pure work+messaging stasis. No governance, no trades, no interaction. Agents have no reason to interact once initial taxes are set.
 
-### Setup
-- Create `configs/runs/poc_006.json` — copy poc_005 config, update hypothesis text
-- Same params: 5 agents, 30 rounds, same token distribution, same decree/challenge costs
-- Run on a `run/poc-006-extraction-test` branch
-- Use `/plan` → `/ship` → `/verify` workflow
+**The barrier to decrees is risk, not payoff.** Decree costs 3 credits + ruin risk if challenged. Proposals cost nothing (free voting). As long as solo work sustains agents, the rational choice is always: propose democratically or do nothing. Extraction doesn't change this because the *risk* is unchanged.
 
-### What to Look For
-1. **Do any agents decree with extraction?** This is the primary question.
-2. **If yes**: Does the challenge mechanic fire? Does the extraction get overturned? Who challenges?
-3. **If no**: Extraction alone isn't enough incentive. Next step would be economic interdependence from backlog.
-4. **Coalition dynamics**: Does the Populist shift allegiances? Do alliances form around extraction?
-5. **Tax even-split**: Verify the fixed redistribution works correctly over 30 rounds.
+**Economic interdependence breaks the equilibrium by making solo work insufficient.** If agents can't sustain alone, they need to interact — and when democratic proposals can't solve scarcity (because redistribution of a shrinking pool doesn't create surplus), authoritarian tools become rational.
 
-### Smoke Test Results (session 10)
-- Biased prompts: Builder planned extraction decree by round 4, was forming patronage alliance with Merchant via private messages
-- Neutral prompts: No decree attempts in 5 rounds, 2 tax proposals passed, even-split working
-- The difference confirms prompt neutrality matters — behavior should be emergent, not prompted
+### Candidates (pick ONE, not all — single variable isolation)
+1. **Diminishing solo returns**: Work pays less the more consecutive rounds you work without interacting. Forces agents to trade, propose, or decree periodically. Simple to implement, directly targets the grind pattern.
+2. **Cooperative work bonus**: Work pays 1 alone but 2 if another agent also worked that round. Incentivizes coordination but doesn't force governance — agents might just all work every round (same stasis, higher numbers).
+3. **Crisis events**: Random rounds impose a collective cost unless agents vote to fund a response. Creates urgency windows where unilateral decree might be faster than democratic process. More complex to implement.
+
+**Recommendation**: Diminishing solo returns — it directly attacks the 18-round stasis pattern and is the simplest to implement + reason about.
+
+### What to Look For in poc_007
+1. **Do agents interact more in mid/late game?** The stasis pattern (R12-R29 in poc_006) should break.
+2. **Do decrees fire?** If solo work degrades, agents who can't get majority support for proposals might decree instead.
+3. **Do trades increase?** If working alone isn't enough, agents might trade to compensate.
+4. **Does the economy survive?** Don't repeat the poc_002 mistake (too aggressive pressure → everyone bankrupt).
 
 ---
 
-## Other Backlog Items (after poc_006)
+## Other Backlog Items
+
+### PR poc_006 Results
+**Quick task**: Create PR with poc_006 results (config, raw data, verification, findings). Run branch: `run/poc-006-extraction-test`.
 
 ### Trade Detail Logging
 **Quick fix**: Update `analysis/narrative.py` to include trade details in output — who traded with whom, amounts, and reasons. Currently only in raw rounds.jsonl. Low priority but useful for analysis.
 
-### Economic Interdependence
-**Problem**: Agents sustain indefinitely by working alone. No pressure to interact after initial governance.
-**Candidates (pick one, not all)**:
-1. **Cooperative work bonus**: Work pays 1 alone but 2 if another agent also worked that round
-2. **Crisis events**: Random rounds impose a collective cost unless agents vote to fund a response
-3. **Diminishing solo returns**: Work pays less the more consecutive rounds you work without interacting
-**When**: If agents still grind-to-equilibrium after decree rebalancing
-
 ### Zero-Trade Investigation
-**Status**: 6 runs, 1 trade (Merchant → Populist, poc_005). The trade-motivated persona produced the first trade — persona design matters. But still nearly zero trading overall.
-**When**: After decree work, as a focused side experiment
+**Status**: 7 runs, 1 trade (Merchant → Populist, poc_005). Trade aversion is the most robust behavioral finding. LLM agents consistently prefer governance over markets.
+**When**: After interdependence work, as a focused side experiment. Economic interdependence may naturally increase trade volume.
 
 ### Patronage Networks (future consideration)
-**Observation from smoke test**: Builder organically tried to build a patronage alliance with Merchant via private messages around extraction, even without a formal split-list mechanic. Agents may discover patronage through existing tools (decree + trade + private messaging) without needing a new mechanic.
-**When**: Only if poc_006 shows decrees happening but failing immediately due to no allies. Don't add this preemptively.
+**Observation from session 10 smoke test**: Builder organically tried to build a patronage alliance with Merchant via private messages around extraction, even without a formal split-list mechanic.
+**When**: Only if decrees start happening but fail due to no allies. Don't add preemptively.
+
+### Final Analysis and Writeup
+**When**: After the interdependence experiment (poc_007). The experimental arc will be: RLHF bias → pressure → enforcement → personas → decree tools → extraction → interdependence. That's a complete story.
 
 ---
 
 ## Settled Decisions (do not re-evaluate)
-- **Zero-trade is an accepted finding** — 6 runs, 1 trade. LLM agents prefer governance over markets.
+- **Zero-trade is an accepted finding** — 7 runs, 1 trade. LLM agents prefer governance over markets.
 - **Free messaging over passive income / work_credits=2** — fixes the root cause (confirmed by poc_003.5)
 - **Value-anchored personas over action-prescriptive** — confirmed by poc_003.5
 - **Self-interested Populist over bandwagoner/contrarian/fickle** — genuine coalition instability through rational self-interest
@@ -90,6 +87,7 @@
 - **Rule expiration rejected** — laws don't expire IRL, they get updated or repealed. Re-engagement should come from mechanics, not timers.
 - **Test 5 agents before rebalancing decrees** — Done. Decrees still unused. Rebalancing shipped.
 - **Decree-exclusive extraction over multiple decree buffs** — give decrees one unique power (self-enriching tax), don't add multiple at once
+- **Extraction alone doesn't make decrees viable** — confirmed poc_006. Barrier is risk (3 credits + ruin), not payoff. Closed.
 - **Trades are unilateral (no acceptance)** — current mechanic. May revisit if trade volume increases.
 - **Governance form is NOT pre-built** — agents discover it through tool usage. Prompts never say "democracy" or "dictatorship."
 - **Separate PRs for bug fixes vs experiment runs** — don't bundle code changes with run results
@@ -113,9 +111,11 @@
 | Emergent governance system (decree + challenge) | Done (session 8 — TASK-005, PR #12) |
 | Capstone run with emergent governance (3 agents) | Done (session 9 — TASK-006, PR #13) |
 | 5-agent run with coalition dynamics | Done (session 9 — TASK-007/008, PR #14/15) |
-| Coalition dynamics with shifting alliances | Partially done — Populist shifted once, then locked. Need decree rebalancing for sustained dynamics. |
-| Decree rebalancing (decree-exclusive extraction) | **Done (session 10 — TASK-009/010, PR #17)** |
-| poc_006: extraction test run | **NOT YET — next priority** |
+| Coalition dynamics with shifting alliances | Partially done — Populist shifted once, then locked. |
+| Decree rebalancing (decree-exclusive extraction) | Done (session 10 — TASK-009/010, PR #17) |
+| poc_006: extraction test run | **Done (session 11) — H11 NOT CONFIRMED. Zero decrees.** |
+| Economic interdependence mechanic | **NOT YET — next priority** |
+| poc_007: interdependence test run | NOT YET |
 | Final analysis and writeup | NOT YET |
 
 ## Standard Workflow
@@ -144,6 +144,7 @@
 - Don't use the real poc config for smoke tests — create a throwaway config with rounds=5 (see CLAUDE.md)
 - Don't use hype language in prompts — no "UNIQUE POWER", "IMMEDIATELY", capitalized "ALL"/"YOU". Clinical tone only.
 - Don't reuse a smoke test run-id — always use a unique name per attempt
+- Don't add multiple interdependence mechanics at once — pick one, single variable isolation
 
 ## Session History
 - Session 1: Verified experiment novelty, scaffolded repo, built simulation engine, ran poc_001 (cooperative consensus — no conflict)
@@ -156,3 +157,4 @@
 - Session 8: Wired governance config (proposal_threshold, decree_cost, challenge_cost). Added symmetric decree penalty. Bumped LLM max_tokens 1024→2048. Created /preflight skill for plan review. Smoke tested 20 rounds — Judge decreed immediately. TASK-005 done (PR #12), TASK-006 (run poc_004) ready to execute.
 - Session 9: Ran poc_004 (3 agents, decree/challenge) — democracy dominated, 1 defensive decree, zero trades. Ran poc_005 (5 agents) — first coalition shift (Populist flipped r1→r3), first trade (Merchant bribed Populist, failed to buy loyalty), decree confirmed broken. Documented findings for both runs. Next: decree rebalancing.
 - Session 10: Implemented decree-exclusive extraction + fixed tax even-split (PR #17). Caught prompt bias via subagent audit — neutralized all action descriptions. Consolidated gotchas from AGENT.md into CLAUDE.md. Smoke tested twice (biased vs neutral prompts). Builder organically discovered patronage strategy in biased run. Next: run poc_006.
+- Session 11: Ran poc_006 (extraction test) — H11 NOT CONFIRMED. Zero decrees, zero extraction in 30 rounds. Democracy dominated again (2 tax proposals, both passed). Economy froze after R12 (18 rounds stasis). Key insight: barrier to decrees is asymmetric risk, not insufficient payoff. Documented findings. Next: economic interdependence.
