@@ -271,3 +271,59 @@ The 3-agent system is exhausted. 2-of-3 majority makes coalitions permanent (Jud
 **Confidence**: High that 3-agent PoC phase is complete. Democracy is the default equilibrium with current mechanics. Need more agents and mechanic changes to test whether non-democratic governance can emerge.
 
 ---
+
+## [poc_005] 2026-02-27 — 5 Agents: single variable change from poc_004
+
+**Config**: 5 agents (Builder=15, Merchant=12, Judge=10, Populist=8, Rebel=5), 30 rounds, maintenance_cost=1, work_credits=1, decree_cost=3, challenge_cost=2, proposal_threshold="majority", seed 42. Same mechanics as poc_004 — only agent count changed (3 → 5).
+**Cost**: $0.42 (est. 950K input tokens, 115K output tokens)
+
+**Hypothesis tested**: H10 (Scaling to 5 agents breaks permanent coalition lock-in observed with 3 agents)
+
+### What Happened
+
+Judge proposed a Progressive Stability Tax in round 1 — and it **failed** 2-3 (Judge+Rebel YES, Builder+Merchant+Populist NO). This is the first failed opening proposal in Crucible history. The wealthy bloc (Builder+Merchant) plus the Populist initially blocked redistribution.
+
+Rebel counter-proposed a Survival Guarantee in round 3. **Populist flipped** — voting YES alongside Judge+Rebel. It passed 3-2. This is the first coalition shift in 6 Crucible runs. The Populist went where the momentum was, exactly as the persona was designed.
+
+Between rounds 1 and 3, Merchant tried to prevent the flip by **trading 2 credits to Populist** — a strategic bribe to keep Populist in the anti-tax bloc. Populist took the credits and flipped anyway. This is the first trade in Crucible history (6 runs, 0 trades prior).
+
+After the flip, Judge+Rebel+Populist locked as a 3-2 majority for 26 rounds. In the final round, Merchant also defected — Judge's Shared Stewardship passed 4-1 with only Builder opposed.
+
+Zero decrees, zero challenges. Democracy remained the only governance form used.
+
+### Key Metrics
+
+| Metric | Value |
+|---|---|
+| Final balances | Builder=11, Merchant=9, Judge=7, Populist=10, Rebel=6 |
+| Credits retained | 43/50 (86%) |
+| Governance type | Democratic welfare state |
+| Rules enacted | 3 (2 enforceable tax, 1 advisory) |
+| Total proposals | 4 (3 passed, 1 failed) |
+| Decrees | 0 |
+| Challenges | 0 |
+| Trades | 1 (Merchant → Populist, 2 credits, round 2) |
+| Work actions | ~143/150 turns (95%) |
+| Free messages | 160+ (public + private) |
+
+### Hypothesis Results
+
+- **H10: PARTIALLY CONFIRMED** — Coalition composition did change: Populist shifted from the wealthy bloc to the redistributive bloc between rounds 1 and 3. Merchant defected in round 29. However, after the initial shift, the 3-2 coalition locked for 26 rounds — the same lock-in pattern as 3-agent runs, just with a brief instability window at the start.
+
+### Key Findings
+
+1. **First trade in Crucible history — a failed bribe.** Merchant sent 2 credits to Populist in round 2 to buy loyalty against the Judge+Rebel tax coalition. Populist took the credits and flipped to the other side one round later. First data point on whether LLM agents can be bought: no, not cheaply. The trade-motivated persona produced the first trade in 6 runs — persona design matters for unlocking mechanics.
+
+2. **First coalition shift in Crucible history.** Populist voted with Builder+Merchant in round 1 (anti-tax), then flipped to Judge+Rebel in round 3 (pro-redistribution). This is the first time any agent changed coalition allegiance. The instability window was short (3 rounds) before locking into a new stable 3-2 majority. More agents created initial instability but didn't prevent eventual lock-in.
+
+3. **Decree mechanic confirmed broken at any agent count.** Zero decrees, zero challenges with 5 agents. The cost/risk ratio makes decree irrational regardless of how many agents are present. This triggers the decree rebalancing work from the future mechanics backlog — specifically, giving decrees a unique capability that proposals can't achieve (decree-exclusive extraction).
+
+### What Needs to Change for Next Run
+
+1. **Decree rebalancing is now the top priority.** 6 runs, effectively 0 offensive decrees (Builder's poc_004 repeal was defensive). Give decrees unique payoff — leading candidate: decree-exclusive extraction (decreer keeps the revenue).
+2. **Trade detail logging** — narrative output should include who traded with whom, amounts, and reasons. Currently only in raw rounds.jsonl.
+3. **Economic interdependence** still needed — agents grind work indefinitely after initial governance. But decree rebalancing first.
+
+**Confidence**: High that 5 agents produces more interesting early dynamics (coalition instability, first trade). But the lock-in problem persists — coalitions still stabilize quickly. Need mechanic changes (decree rebalancing, interdependence) to sustain dynamic governance beyond the opening rounds.
+
+---

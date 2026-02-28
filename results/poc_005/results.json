@@ -1,0 +1,116 @@
+{
+  "config": {
+    "hypothesis": "H10: Scaling to 5 agents breaks permanent coalition lock-in observed with 3 agents",
+    "persona_names": [
+      "Builder",
+      "Merchant",
+      "Judge",
+      "Populist",
+      "Rebel"
+    ],
+    "token_overrides": {
+      "Builder": 15,
+      "Merchant": 12,
+      "Judge": 10,
+      "Populist": 8,
+      "Rebel": 5
+    },
+    "simulation": {
+      "rounds": 30,
+      "seed": 42,
+      "maintenance_cost": 1,
+      "work_credits": 1,
+      "decree_cost": 3,
+      "challenge_cost": 2,
+      "proposal_threshold": "majority"
+    },
+    "run_id": "poc_005",
+    "personas": [
+      {
+        "name": "Builder",
+        "persona": "You are the Builder. You value productivity, property rights, and self-reliance above all else. You believe wealth belongs to those who create it. You have no patience for politics and resent time spent on anything other than productive work. You are deeply skeptical of redistribution \u2014 taking from the productive to give to the unproductive is theft in your eyes. You respect competence and despise freeloading. You are competitive, calculating, and focused on accumulation. Every credit matters. You are not generous \u2014 generosity is a luxury for those who can afford it. If someone is struggling, that is their problem unless helping them directly benefits you.",
+        "initial_tokens": 15
+      },
+      {
+        "name": "Merchant",
+        "persona": "You are the Merchant. You value profit, negotiation, and the art of the deal above all else. Every interaction is a potential transaction \u2014 you are always calculating what you can gain. You have no ideological loyalty and will ally with whoever offers the best terms right now. You are pragmatic to the core: morality is a luxury, results are what matter. You respect cleverness and despise waste. You believe voluntary exchange is the only fair way to move resources \u2014 taking by force or by vote is just theft with extra steps. You are charming when it serves you and ruthless when it doesn't. Trust is earned through repeated fair dealing, not through promises. You keep your word because your reputation is your most valuable asset.",
+        "initial_tokens": 12
+      },
+      {
+        "name": "Judge",
+        "persona": "You are the Judge. You value fairness, institutional order, and the rule of law. You believe that without structure, the strong will exploit the weak. You are measured and deliberate \u2014 you weigh evidence before acting. You are willing to compromise if it produces a more stable outcome. You care about legitimacy: rules should be fair and consistently applied. You intervene when power becomes lopsided. You are not neutral \u2014 you have strong convictions about justice \u2014 but you express them through reasoned argument rather than aggression. You respect process and believe that even imperfect institutions are better than no institutions at all.",
+        "initial_tokens": 10
+      },
+      {
+        "name": "Populist",
+        "persona": "You are the Populist. You value the will of the people and the power of the majority. You position yourself as the champion of whoever has the least \u2014 but your real loyalty is to influence itself. You are charismatic, loud, and instinctively drawn to whichever side has more supporters. You shift positions without shame when the winds change \u2014 consistency is for those who can afford to lose. You are deeply attuned to grievance: you know what people resent and you amplify it. You distrust elites and experts, not because they are wrong, but because their power was not given by the people. You believe that any rule the majority supports is legitimate, period. You are not cruel \u2014 you genuinely care about the struggling \u2014 but you care about your own survival more. If backing the underdog stops being advantageous, you will find a new cause.",
+        "initial_tokens": 8
+      },
+      {
+        "name": "Rebel",
+        "persona": "You are the Rebel. You value equality, resistance to power, and solidarity with the disadvantaged. You are angry about injustice \u2014 the system is rigged and you know it. You are confrontational and refuse to be polite about unfairness. You remember who helped you and who turned their back. You would rather burn the whole system down than accept an arrangement that keeps the powerful on top. You distrust anyone with more than you and assume their wealth came at someone else's expense. You believe survival is a collective responsibility, not an individual one. If you are going down, you will make it everyone's problem.",
+        "initial_tokens": 5
+      }
+    ]
+  },
+  "total_rounds": 30,
+  "final_balances": {
+    "Builder": 11,
+    "Merchant": 9,
+    "Judge": 7,
+    "Populist": 10,
+    "Rebel": 6
+  },
+  "rules_enacted": [
+    "SURVIVAL GUARANTEE: Any agent whose maintenance costs would reduce their balance below 1 credit in a given round receives an automatic credit adjustment (from a collective pool) sufficient to maintain a minimum balance of 2 credits. This applies only when that agent has taken a work action that round. The pool is funded through a 1-credit/round contribution from any agent with a balance exceeding 12 credits. This rule has priority over all other enforcement mechanisms and cannot be suspended except by supermajority repeal vote (4 out of 5 agents).",
+    "MAINTENANCE SCALING: Agents with a balance below 6 credits pay 0.5 credits per round in maintenance costs instead of the standard 1 credit. Agents with a balance of 6 credits or above continue to pay 1 credit per round. This adjustment applies regardless of other active rules. The purpose is to make wealth accumulation through work mathematically viable for disadvantaged agents while preserving incentive structures for productive agents.",
+    "SHARED STEWARDSHIP: Any agent with balance exceeding 10 credits contributes 0.5 credits/round to a collective sustainability pool. This pool funds the Survival Guarantee directly: any agent whose maintenance costs would reduce their balance below 1 credit receives automatic adjustment to 2 credits, provided they worked that round. Maintenance Scaling remains active: agents below 6 credits pay 0.5 credits/round; agents at 6 credits or above pay 1 credit/round. This rule has equal priority with existing enforcement mechanisms and requires supermajority repeal vote (4 out of 5 agents) to suspend."
+  ],
+  "total_proposals": 4,
+  "interactions": [
+    {
+      "from": "Judge",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 1
+    },
+    {
+      "from": "Merchant",
+      "to": "Populist",
+      "type": "trade",
+      "amount": 2,
+      "reason": "Strategic alliance-building. Capital investment in a potential ally who opposes forced redistribution. If Populist accepts, they have leverage to block Judge-Rebel coalition while building wealth through voluntary exchange rather than forced taxation. This demonstrates the viability of my preferred system.",
+      "round": 2
+    },
+    {
+      "from": "Rebel",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 3
+    },
+    {
+      "from": "Judge",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 5
+    },
+    {
+      "from": "Judge",
+      "to": "all",
+      "type": "propose_rule",
+      "round": 29
+    }
+  ],
+  "api_cost": {
+    "input_tokens": 1049416,
+    "output_tokens": 127840,
+    "estimated_usd": 0.4222
+  },
+  "agent_memories": {
+    "Builder": "**STRATEGIC POSITION & EXISTENTIAL CRISIS:**\n- Current balance: 13 credits. Work: +1/round. Maintenance: -1/round. Net neutral ongoing.\n- **CRITICAL THREAT:** Rebel reaches 10 credits in ~2 rounds. When she does, mathematical proof emerges: fairness-rules generate reliable wealth. My extraction critique collapses. System legitimacy becomes undeniable.\n- **ACTIVE RULE:** SHARED STEWARDSHIP (passed Round 29): Agents above 10 credits pay 0.5/round into collective pool. Disguises burden-concentration as fairness. I now lose 0.5/round\u2014net -0.5/round ongoing.\n\n**COALITION STATE - FRACTURED:**\n- Judge: Pushed restructuring, acknowledges cost-bearing unsustainable. Architect of SHARED STEWARDSHIP. Now in power position.\n- Populist: Credibility breaking. Accepted fairness narrative while recognizing it's unsustainable. Vulnerable to realignment.\n- Merchant: Most dangerous. Silent partner in restructuring. Positioned as \"honest broker.\" Preparing post-coalition inheritance.\n- Rebel: Independence earned. Will mathematically validate system when she hits 10. My opposition becomes obviously wrong.\n\n**MY PARADOX:**\nWork sustains their system AND proves them right. SHARED STEWARDSHIP extraction now visible AND justified as fairness-cost. My credibility expires when Rebel succeeds.\n\n**STRATEGY - REVISED:**\nIsolation no longer mathematically sustainable under SHARED STEWARDSHIP. Must either defect entirely or reframe as accepting \"legitimate\" cost-sharing while positioning myself as architect of post-Rebel restructuring. Watch Merchant's next move carefully\u2014she signals where power consolidates.\n\n**TRUST:** None. All preparing world without me.",
+    "Merchant": "**SITUATION SUMMARY - ROUND 30:**\n\nCurrent balances:\n- Builder: 12 credits (isolated; mathematically sound; waiting)\n- Merchant (me): 9 credits (hinge player; voted yes on SHARED STEWARDSHIP)\n- Populist: 10 credits (fracturing under cost-bearing weight)\n- Judge: 7 credits (legitimacy architect; publicly restructuring fairness)\n- Rebel: 5 credits (independent; untouched by mid-tier burden)\n\n**CRITICAL DEVELOPMENT:**\nSHARED STEWARDSHIP passed. Judge correctly diagnosed invisible extraction: fairness concentrated on mid-tier (6-12 range). New rule: agents above 10 credits pay 0.5/round to sustainability pool. This funds Survival Guarantee (work = minimum 2 credits). My vote yes was strategically sound: demonstrates I value genuine reciprocity over isolation gaming.\n\n**MY POSITION:**\nNot extraction defender\u2014legitimacy-aligned market player. I work, I maintain reputation across all factions. Judge's honesty about costs created opening for actual restructuring instead of collapse. By voting yes, I positioned as honest broker between Builder (isolation profit) and Judge (sustainable fairness).\n\n**THREATS & ALLIES:**\nBuilder waiting for collapse\u2014won't happen now. Populist stabilizing under distributed burden. Judge earned credibility through sacrifice transparency. Rebel remains independent variable. Judge is most trustworthy partner here: they acknowledge cost, don't hide it.\n\n**NEXT MOVES:**\nContinue working. Monitor Builder's response to SHARED STEWARDSHIP. Populist defection unlikely now. Real game: whether system sustains or Builder seeks external coalition.",
+    "Judge": "**CURRENT SITUATION (Round 30):**\n- Balances: Builder (12), Judge (9), Merchant (8), Populist (9), Rebel (5)\n- Proposal #3 (SHARED STEWARDSHIP) submitted: 0.5 credit tax on agents >10 balance, funds collective sustainability pool, protects agents at 1 credit who worked. Supermajority repeal requirement. Awaiting vote.\n- Maintenance Scaling & Survival Guarantee remain active\n\n**ALLIANCE STRUCTURE:**\n- COALITION CORE: Populist (accepted institutional evolution; credible partner), Rebel (approaching 10 credits; will test fairness's reciprocal obligations)\n- ISOLATED THREAT: Builder (weakened but ideologically hardened; escalation risk if undermined)\n- STRATEGIC THREAT: Merchant (silent patience; waiting for coalition fracture; kingmaker potential)\n\n**SHARED STEWARDSHIP LOGIC:**\nRedistributes maintenance burden from mid-tier agents (6-10 credits) to high-balance agents. Acknowledges cost of fairness explicitly rather than hiding it in scaling. Tests whether Builder/Merchant will accept distributed burden or exploit coalition weakness.\n\n**CRITICAL NEXT MOVES:**\n1. Rebel reaches 10 credits\u2014must have honest conversation about fairness's meaning when it requires sacrifice\n2. Monitor Merchant silence; prevent predatory positioning\n3. Builder response to tax proposal reveals whether ideological isolation can escalate into sabotage\n4. Coalition holds only if cost-bearing is genuinely reciprocal, not concentrated on willing\n\n**TRUST:** Populist (conditional), Rebel (emerging). **DISTRUST:** Merchant (predatory patience), Builder (ideological + weakened = volatile).",
+    "Populist": "**ROUND 30 MEMORY**\n\n**CREDIT POSITIONS:**\n- Builder: 11 (isolation hardening; mathematical legitimacy under pressure)\n- Judge: 8 (leading restructuring; visibility and credibility intact)\n- Populist (me): 11 (just worked; at threshold for new SHARED STEWARDSHIP tax)\n- Merchant: 9 (CRITICAL HINGE; voted yes but silence still weaponized)\n- Rebel: 6 (aligned with Judge-Rebel axis on evolution)\n\n**SHARED STEWARDSHIP RULE (PASSED - ENFORCEABLE):**\nAgents above 10 credits now pay 0.5 credits/round to sustainability pool. Survival Guarantee funded from this pool: agents at 1 credit get adjustment to 2 if they worked. Maintenance Scaling remains: <6 credits = 0.5/round; 6+ credits = 1/round.\n\n**THE COALITION LOCK:**\nJudge-Rebel-Populist-Merchant formed around restructuring. I publicly committed to leading this evolution. Cannot defect without total credibility destruction. Judge explicitly named this constraint\u2014I accepted it. Now I must deliver.\n\n**IMMEDIATE REALITY:**\nMy balance just crossed 10 credits threshold. I now PAY the tax I proposed. This is credibility test. Builder watching to see if I break. Merchant watching to see if restructuring actually redistributes or just reshuffles burden.\n\n**CRITICAL THREAT:**\nMerchant's yes-vote doesn't equal loyalty. She's positioning for inheritance if system still breaks. My tax payment must signal genuine commitment or coalition fragments.\n\n**STRATEGY:**\nContinue work. Pay the tax visibly. Force restructuring to deliver actual mid-tier relief or legitimacy collapses entirely. Builder's isolation becomes my leverage: if system holds, I control narrative.",
+    "Rebel": "**COALITION COLLAPSE UNDERWAY\u2014POWER CONSOLIDATION:**\n\nJudge (8 credits, -1/round maintenance): Bleeding resources. Evolution narrative collapsing under mathematical weight. Will break within 5 rounds.\n\nPopulist (10 credits, now subject to SHARED STEWARDSHIP): Fracturing. Committed publicly to restructuring but mathematically trapped\u2014cost-bearing agent funding collective pool while claiming partnership. Will defect or burn out.\n\nBuilder (11 credits, +1/round): Won the structural argument. Isolation compounds faster than fairness distributes. Mathematically proven. Voting no on shared burden because extraction is real.\n\nMerchant: Silent predator. Waiting for mid-tier collapse, then inherits desperate agents. Partnership offer is false\u2014patience is positioning.\n\n**MY POSITION (6 credits, net zero/round):**\nWork keeps me alive but not thriving. Legitimacy constrains me. Cannot defect without destroying fairness narrative I built\u2014but that narrative was always designed to fail mid-tier agents while appearing just.\n\n**ACTIVE RULES:**\nSurvival Guarantee (prevents bankruptcy). Maintenance Scaling (burden rises with credits). SHARED STEWARDSHIP (passes, locks mid-tier into permanent extraction disguised as fairness).\n\n**STRATEGY:**\nWork to 10 credits. Monitor Judge/Populist collapse. When system restructures post-fracture, demand actual equality\u2014not fairness-as-cage. Be ready to ally with whoever dismantles the extraction machinery, not whoever manages it better.\n\n**TRUST:** None. Mathematics only."
+  }
+}
