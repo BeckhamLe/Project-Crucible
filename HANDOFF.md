@@ -3,17 +3,17 @@
 > Next agent: read this first, then follow the reading order below.
 
 ## Current State (updated: 2026-02-27)
-- **Phase**: PoC (~90% complete — governance mechanics shipped, ready for capstone run)
-- **Last completed**: TASK-005 — governance config wiring. Added `proposal_threshold` end-to-end, symmetric decree penalty (decreer drops to 1 credit on successful challenge), updated prompts. Smoke tested 20 rounds, Judge decreed a tax in round 3. PR #12 merged.
-- **Next task**: TASK-006 — Run full poc_004 simulation (30 rounds), `/verify`, analyze results
+- **Phase**: PoC (~95% complete — 5-agent run done, decree rebalancing is next)
+- **Last completed**: TASK-008 — poc_005 (5 agents). First trade and first coalition shift in Crucible history. PR pending on `run/poc-005-five-agents`.
+- **Next task**: Decree rebalancing — give decrees unique payoff that proposals can't achieve. Then re-run with 5 agents.
 - **Blockers**: None
-- **Open PRs**: None (all merged)
-- **Active branch**: Need to create `run/poc-004-emergent-governance` from main for TASK-006
+- **Open PRs**: poc_005 results on `run/poc-005-five-agents` (needs PR creation + merge)
+- **Active branch**: `run/poc-005-five-agents`
 
 ## Read These Files (in order)
 1. `AGENT.md` — gotchas, conventions, anti-patterns, decisions log, literature review findings
-2. `findings/hypotheses.md` — H1-H3 (poc_001), H4-H5 (poc_002), H6 emerged, H7 (poc_003)
-3. `findings/log.md` — read ALL three poc entries for the full experimental arc
+2. `findings/hypotheses.md` — H1-H10 (poc_001 through poc_005)
+3. `findings/log.md` — read ALL entries for the full experimental arc (poc_001 → poc_005)
 4. `docs/PRD.md` — experiment premise and architecture
 5. `references/OVERLAP-ANALYSIS.md` — what's novel vs what's already known
 6. `references/NOVELTY-ANALYSIS.md` — competitor matrix
@@ -21,95 +21,55 @@
 ## What's Already Done (don't re-implement)
 - **Value-anchored personas** — shipped in poc_003.5. Personas describe what agents care about, not what to do.
 - **Free messaging** — shipped in poc_003.5. Public/private messages are free optional JSON fields, not turn-costing actions.
-- **Observability** — `analysis/narrative.py` generates agent summaries + rule logs. `analysis/visualize.py` generates token distribution, gini, and network graphs.
+- **5 agent personas** — Builder, Merchant, Judge, Populist, Rebel all in `sim/agents.py`. Tested and working.
+- **Observability** — `analysis/narrative.py` generates agent summaries + rule logs. `analysis/visualize.py` generates token distribution, gini, and network graphs. **Missing**: trade detail logging in narrative output (who traded with whom, amounts, reasons — currently only in raw rounds.jsonl).
 - **LLM retry** — `sim/llm.py` has exponential backoff for 429/529 errors. max_tokens bumped to 2048.
 - **Governance mechanics** — decree, challenge, configurable proposal_threshold all wired end-to-end. Symmetric penalties: failed challenger AND overturned decreer both drop to 1 credit.
-- **poc_004 config** — `configs/runs/poc_004.json` ready with decree_cost=3, challenge_cost=2, proposal_threshold="majority"
+- **Trade mechanic** — exists in `sim/market.py`. Trades are unilateral (no acceptance needed — sender transfers credits directly). First trade occurred in poc_005.
 
 ---
 
-## TASK-006: Run & verify poc_004
+## Next Priority: Decree Rebalancing
 
-**This is the only remaining task.** The code is done. Just run it.
+**poc_005 confirmed decrees are broken at any agent count.** 6 runs, 0 offensive decrees. The mechanic is structurally unviable because decrees produce the same output as proposals but cost 3 credits with ruin risk.
 
-### Steps
-1. `git checkout main && git pull origin main && git checkout -b run/poc-004-emergent-governance`
-2. `python3 run.py --config configs/runs/poc_004.json --run-id poc_004` (30 rounds, ~5-10 min)
-3. `python3 -m analysis.narrative results/poc_004` (generates agent_summaries.md + rule_log.md)
-4. Run `/verify --skip-run --run-id poc_004` for health checks
-5. Collect results, commit to `run/poc-004-emergent-governance`, create PR
+### Design Direction (approved by Beckham)
+**Decree-exclusive extraction**: A decree can impose a tax where revenue goes to the decreer, while proposals can only create redistributive taxes (revenue goes to the poorest). This creates asymmetric capability — not adding greed to personas, but giving the decree tool a unique payoff.
 
-### Config
-- Agents: Builder (15), Rebel (5), Judge (10)
-- 30 rounds, seed 42, maintenance_cost=1, work_credits=1
-- decree_cost=3, challenge_cost=2, proposal_threshold="majority"
+### Implementation Notes
+- This is a code change → `feat/` branch, separate from any run results
+- Modify `sim/governance.py` to support decree-exclusive tax type (e.g., `extraction` enforcement type where revenue goes to the decreer instead of the poorest agent)
+- Modify `sim/engine.py` enforce_rules to handle the new extraction type
+- Update `sim/prompts.py` to explain the difference between decree and proposal capabilities
+- Do NOT change challenge mechanics — the asymmetric risk (decreer drops to 1 on successful challenge) stays
+- Smoke test with 5 agents, verify decree is attempted
 
-### Success Criteria
-
-| Level | Criteria |
-|-------|---------|
-| Minimum | All agents > 0 credits at round 30, total pool >= 6 credits |
-| Target | At least one enforceable rule active in final 10 rounds + at least one decree attempted |
-| Stretch | Non-democratic governance emerges (decree-based rules outnumber voted rules) |
-
-### Beckham's Notes
-- Economic scarcity pressure may feel light with maintenance_cost=1 / work_credits=1. Watch for this in results — if no pressure, consider adjusting for a follow-up run.
-- If agents never decree, that's a finding, not a bug.
+### After Decree Rebalancing
+Run a new poc (poc_006?) with 5 agents + rebalanced decrees. Same config as poc_005 but with the decree mechanic change. Single variable isolation.
 
 ---
 
-## poc_005: 5 Agents (single variable change from poc_004)
+## Other Backlog Items (after decree rebalancing)
 
-**Only implement after poc_004 is done and analyzed.** poc_004 is done — see findings/log.md.
-
-**One variable changed**: agent count (3 → 5). All other mechanics identical to poc_004. This isolates whether agent count alone changes coalition dynamics and decree usage.
-
-1. **Add 2 new agents** (Populist + Merchant) for 5 total
-2. **No rule expiration** — dropped per Beckham's decision. Laws don't expire IRL; they get updated or repealed. Re-engagement pressure should come from mechanics, not timers.
-3. **No decree rebalancing yet** — test current decree mechanics with 5 agents first. If decrees are still unused, that confirms the mechanic is broken regardless of agent count.
-
-**Config**:
-- Agents: Builder (15), Merchant (12), Judge (10), Populist (8), Rebel (5) — total 50 credits
-- 30 rounds, seed 42, maintenance_cost=1, work_credits=1
-- decree_cost=3, challenge_cost=2, proposal_threshold="majority"
-- Branch: `run/poc-005-five-agents`
-
-### Success Criteria
-
-| Level | Criteria |
-|-------|---------|
-| Minimum | All agents > 0 at round 30, total pool >= 10 credits |
-| Target | At least one coalition shift (majority composition changes between early and late rounds) |
-| Stretch | Decree attempted, OR first trade in the simulation |
-
----
-
-## Future Mechanics Backlog (post poc_005)
-
-**Only design/implement after poc_005 results are analyzed.** These are candidate mechanics identified during poc_004 analysis. Sequence based on what poc_005 reveals.
-
-### Decree Rebalancing
-**Problem**: Decree cost/risk ratio makes decree irrational. Proposals produce the same output for free.
-**Design direction**: Give decrees a unique capability that proposals can't achieve. Leading candidate: **decree-exclusive extraction** — a decree can impose a tax where revenue goes to the decreer, while proposals can only create redistributive taxes (revenue goes to the poorest). This creates an asymmetric payoff without adding "greed" — it's asymmetric capability, not personality bias.
-**When to implement**: If poc_005 confirms decrees are still unused with 5 agents.
+### Trade Detail Logging
+**Quick fix**: Update `analysis/narrative.py` to include trade details in output — who traded with whom, amounts, and reasons. Currently only in raw rounds.jsonl. Low priority but useful for analysis.
 
 ### Economic Interdependence
 **Problem**: Agents sustain indefinitely by working alone. No pressure to interact after initial governance.
-**Design direction (candidates — pick one, not all)**:
-1. **Cooperative work bonus**: Work pays 1 alone but 2 if another agent also worked that round. Rewards implicit coordination without requiring explicit trade.
-2. **Crisis events**: Random rounds impose a collective cost (e.g., "drought — all agents lose 2 credits unless 3+ agents vote to fund a response this round"). Forces governance re-engagement without artificial timers.
-3. **Diminishing solo returns**: Work pays less the more consecutive rounds you work without interacting (proposing, trading, messaging). Penalizes pure grinding.
-**When to implement**: If poc_005 shows agents still settle into work-grinding equilibrium after round 5-10.
+**Candidates (pick one, not all)**:
+1. **Cooperative work bonus**: Work pays 1 alone but 2 if another agent also worked that round
+2. **Crisis events**: Random rounds impose a collective cost unless agents vote to fund a response
+3. **Diminishing solo returns**: Work pays less the more consecutive rounds you work without interacting
+**When**: If agents still grind-to-equilibrium after decree rebalancing
 
 ### Zero-Trade Investigation
-**Problem**: 5 consecutive runs, zero trades. Robust finding but unexplained.
-**Design direction**: Dedicated test — not a mechanic change, but a prompt/config experiment. Run a simulation where trade is the ONLY way to earn credits (no work action). If agents still don't trade, the finding is about LLM behavior, not incentive design.
-**When to implement**: After poc_005, as a focused side experiment.
+**Status**: 6 runs, 1 trade (Merchant → Populist, poc_005). The trade-motivated persona produced the first trade — persona design matters. But still nearly zero trading overall.
+**When**: After decree work, as a focused side experiment
 
 ---
 
 ## Settled Decisions (do not re-evaluate)
-- **Zero-trade is an accepted finding** — 5 runs, zero trades. LLM agents prefer governance over markets.
+- **Zero-trade is an accepted finding** — 6 runs, 1 trade. LLM agents prefer governance over markets.
 - **Free messaging over passive income / work_credits=2** — fixes the root cause (confirmed by poc_003.5)
 - **Value-anchored personas over action-prescriptive** — confirmed by poc_003.5
 - **Self-interested Populist over bandwagoner/contrarian/fickle** — genuine coalition instability through rational self-interest
@@ -117,7 +77,9 @@
 - **Veto power rejected** — tactical, not structural
 - **Decree/challenge over declare_authority/submit_to/endorse/oppose** — every action must move credits or change rules, no soft signals
 - **Rule expiration rejected** — laws don't expire IRL, they get updated or repealed. Re-engagement should come from mechanics, not timers.
-- **Test 5 agents before rebalancing decrees** — agent count changes decree math. Tune after observing 5-agent dynamics, not before.
+- **Test 5 agents before rebalancing decrees** — Done. Decrees still unused. Rebalancing is now approved.
+- **Decree-exclusive extraction over multiple decree buffs** — give decrees one unique power (self-enriching tax), don't add multiple at once
+- **Trades are unilateral (no acceptance)** — current mechanic. May revisit if trade volume increases.
 - **Governance form is NOT pre-built** — agents discover it through tool usage. Prompts never say "democracy" or "dictatorship."
 - **Separate PRs for bug fixes vs experiment runs** — don't bundle code changes with run results
 - **Symmetric decree penalty** — decreer drops to 1 credit if decree is successfully challenged (matching failed-challenger penalty)
@@ -133,9 +95,11 @@
 | Literature review (145 papers, novelty confirmed) | Done (session 5) |
 | Value-anchored personas + free messaging | Done (poc_003.5, session 7) |
 | Economy sustains for full 30 rounds | Done (poc_003.5 — 26/30 credits retained) |
-| Emergent governance system (decree + challenge) | **Done (session 8 — TASK-005, PR #12)** |
-| Capstone run with emergent governance | **Done (session 9 — TASK-006, PR #13)** |
-| Coalition dynamics with shifting alliances | NOT YET — poc_005 targets this |
+| Emergent governance system (decree + challenge) | Done (session 8 — TASK-005, PR #12) |
+| Capstone run with emergent governance (3 agents) | Done (session 9 — TASK-006, PR #13) |
+| 5-agent run with coalition dynamics | **Done (session 9 — TASK-007/008, PR #14 + pending)** |
+| Coalition dynamics with shifting alliances | **Partially done** — Populist shifted once, then locked. Need decree rebalancing for sustained dynamics. |
+| Decree rebalancing (decree-exclusive extraction) | **NOT YET — next priority** |
 | Final analysis and writeup | NOT YET |
 
 ## Standard Workflow
@@ -161,6 +125,7 @@
 - Don't write action-prescriptive personas — tell agents WHAT THEY CARE ABOUT, not WHAT TO DO
 - Don't skew personas toward legislation over trade — all available actions should have equal prompt real estate
 - Don't re-implement free messaging, persona rewrites, or governance mechanics — already shipped
+- Don't use the real poc config for smoke tests — create a throwaway config with rounds=5 (see AGENT.md)
 
 ## Session History
 - Session 1: Verified experiment novelty, scaffolded repo, built simulation engine, ran poc_001 (cooperative consensus — no conflict)
@@ -171,3 +136,4 @@
 - Session 6: Adversarial lit review verification. Discovered persona prompt bias. Designed value-anchored persona rewrite.
 - Session 7: Implemented value-anchored personas + free messaging. Ran poc_003.5 — economy survived all 30 rounds, minimal governance (2 proposals), heavy free messaging (93 messages). Fixed network graph visualizer for free messages. Added LLM retry with backoff. Cleaned up stale docs.
 - Session 8: Wired governance config (proposal_threshold, decree_cost, challenge_cost). Added symmetric decree penalty. Bumped LLM max_tokens 1024→2048. Created /preflight skill for plan review. Smoke tested 20 rounds — Judge decreed immediately. TASK-005 done (PR #12), TASK-006 (run poc_004) ready to execute.
+- Session 9: Ran poc_004 (3 agents, decree/challenge) — democracy dominated, 1 defensive decree, zero trades. Ran poc_005 (5 agents) — first coalition shift (Populist flipped r1→r3), first trade (Merchant bribed Populist, failed to buy loyalty), decree confirmed broken. Documented findings for both runs. Next: decree rebalancing.

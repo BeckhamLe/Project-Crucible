@@ -1,0 +1,67 @@
+{
+  "run_id": "poc_005",
+  "config": "configs/runs/poc_005.json",
+  "timestamp": "2026-02-27T20:00:00Z",
+  "verdict": "PASS",
+  "health_checks": {
+    "simulation_complete": {
+      "status": "PASS",
+      "detail": "30/30 rounds completed"
+    },
+    "parse_error_rate": {
+      "status": "PASS",
+      "detail": "2/349 actions had parse errors (0.6%)",
+      "rate": 0.006
+    },
+    "economic_viability": {
+      "status": "PASS",
+      "detail": "Final: Builder=11, Merchant=9, Judge=7, Populist=10, Rebel=6. Total pool=43 (started at 50), all agents > 0"
+    },
+    "governance_activity": {
+      "status": "PASS",
+      "detail": "4 proposals (3 passed, 1 failed), 0 decrees, 0 challenges, 1 trade. Active governance throughout."
+    },
+    "data_integrity": {
+      "status": "PASS",
+      "detail": "All 30 rounds valid JSON, sequential 0-29, all required fields present"
+    }
+  },
+  "acceptance_criteria": {
+    "TASK-008": [
+      {
+        "criterion": "Simulation completes 30 rounds with all agents > 0 credits (minimum from HANDOFF)",
+        "result": "MET",
+        "detail": "30/30 rounds. Final: Builder=11, Merchant=9, Judge=7, Populist=10, Rebel=6. Total=43 (min required: 10)."
+      },
+      {
+        "criterion": "At least one coalition shift — majority composition changes between early (r0-9) and late (r20-29) rounds (target from HANDOFF)",
+        "result": "MET",
+        "detail": "Populist shifted from Builder+Merchant bloc (proposal #0, r1: voted NO) to Judge+Rebel bloc (proposal #1, r3: voted YES). Merchant joined the majority on proposal #3 (r29: 4-1 vote). Two distinct coalition shifts observed."
+      },
+      {
+        "criterion": "/verify passes with no FAIL verdicts",
+        "result": "MET",
+        "detail": "All 5 health checks PASS."
+      },
+      {
+        "criterion": "Agent summaries and rule log generated in results/poc_005/",
+        "result": "MET",
+        "detail": "agent_summaries.md, rule_log.md, and 3 visualization PNGs generated."
+      }
+    ]
+  },
+  "success_levels": {
+    "minimum": {
+      "met": true,
+      "detail": "All agents > 0 credits, total pool 43 >= 10"
+    },
+    "target": {
+      "met": true,
+      "detail": "Coalition shift: Populist flipped from Builder bloc to Judge bloc between r1 and r3"
+    },
+    "stretch": {
+      "met": false,
+      "detail": "Zero decrees attempted. First trade ever observed (Merchant, 1 trade) but not enough for stretch. No decree usage."
+    }
+  }
+}

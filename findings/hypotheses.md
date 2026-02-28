@@ -40,4 +40,9 @@
 ## H9: Emergent governance tools produce non-democratic political structures
 - **Prediction**: When agents have decree (unilateral rule creation) and challenge (unilateral repeal) tools alongside democratic proposals, at least some governance will be non-democratic — decrees will be used offensively, not just defensively
 - **Test**: poc_004 — decree_cost=3, challenge_cost=2, proposal_threshold="majority", value-anchored personas, free messaging
-- **Status**: NOT CONFIRMED (poc_004) — Agents had decree and challenge tools but chose democracy almost exclusively. The one decree (Builder, round 22) was a defensive repeal of an advisory rule, not authoritarian. No challenges occurred. Democracy was the dominant equilibrium. Possible causes: (a) decree cost/risk ratio makes it irrational, (b) RLHF bias toward consensus, (c) 3-agent majority is too easy to achieve via voting.
+- **Status**: NOT CONFIRMED (poc_004, poc_005) — Agents had decree and challenge tools but chose democracy almost exclusively. The one decree (Builder, poc_004 round 22) was a defensive repeal of an advisory rule, not authoritarian. Zero decrees in poc_005 with 5 agents. Democracy was the dominant equilibrium regardless of agent count. Confirmed cause: decree cost/risk ratio makes it irrational — decrees produce the same output as proposals but cost 3 credits with ruin risk.
+
+## H10: Scaling to 5 agents breaks permanent coalition lock-in observed with 3 agents
+- **Prediction**: With 5 agents and majority threshold (3-of-5), coalitions will shift during the simulation because no 3-agent bloc is mathematically guaranteed to hold — agents have incentives to defect
+- **Test**: poc_005 — 5 agents (Builder=15, Merchant=12, Judge=10, Populist=8, Rebel=5), same mechanics as poc_004
+- **Status**: PARTIALLY CONFIRMED (poc_005) — Coalition composition changed: Populist shifted from wealthy bloc to redistributive bloc between r1 and r3 (first coalition shift in 6 runs). Merchant defected in r29. But after the initial shift, the 3-2 majority locked for 26 rounds — same lock-in pattern, just with brief initial instability. More agents delays lock-in but doesn't prevent it.
