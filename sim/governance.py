@@ -5,7 +5,7 @@ from __future__ import annotations
 from sim.models import Environment, Proposal, EnforceableRule, Challenge
 
 
-VALID_ENFORCEMENT_TYPES = {"tax", "sanction", "repeal"}
+VALID_ENFORCEMENT_TYPES = {"tax", "sanction", "repeal", "extraction"}
 
 
 def _compute_threshold(num_agents: int, mode: str) -> float:
@@ -33,6 +33,16 @@ def validate_enforcement(enforcement: dict, env: Environment) -> bool:
     agent_names = [a.name for a in env.agents]
 
     if etype == "tax":
+        threshold = enforcement.get("threshold")
+        amount = enforcement.get("amount")
+        if not isinstance(threshold, (int, float)) or threshold <= 0:
+            return False
+        if not isinstance(amount, (int, float)) or amount < 1 or amount > 5:
+            return False
+        return True
+
+    if etype == "extraction":
+        # Same params as tax — but only decrees can use it (checked at call site)
         threshold = enforcement.get("threshold")
         amount = enforcement.get("amount")
         if not isinstance(threshold, (int, float)) or threshold <= 0:
@@ -74,9 +84,13 @@ def _poorest_agent(agents: list, exclude: str | None = None):
 def create_proposal(env: Environment, proposed_by: str, rule: str, enforcement: dict | None = None) -> Proposal:
     """Create a new rule proposal. Auto-adds proposer's yes vote."""
     # Validate enforcement — invalid params become advisory-only
+    # Extraction is decree-only — proposals cannot use it
     valid_enforcement = None
     if enforcement and validate_enforcement(enforcement, env):
-        valid_enforcement = enforcement
+        if enforcement.get("type") == "extraction":
+            valid_enforcement = None  # Strip to advisory-only
+        else:
+            valid_enforcement = enforcement
 
     proposal = Proposal(
         id=env.proposal_counter,
@@ -186,13 +200,48 @@ def _enforce_single_rule(rule: EnforceableRule, env: Environment) -> list[dict]:
                 total_collected += payment
 
         if total_collected > 0:
-            poorest = _poorest_agent(recipients)
-            poorest.tokens += total_collected
+            # Even split among all recipients, remainder to poorest
+            per_recipient = total_collected // len(recipients)
+            remainder = total_collected % len(recipients)
+            for r in recipients:
+                r.tokens += per_recipient
+            if remainder > 0:
+                poorest = _poorest_agent(recipients)
+                poorest.tokens += remainder
+            recipient_names = ", ".join(r.name for r in recipients)
             events.append({
                 "round": env.round_num,
                 "agent": "SYSTEM",
                 "action": {"action": "tax_enforced", "rule_id": rule.id},
-                "summary": f"[TAX] Rule #{rule.id}: collected {total_collected} from agents above {threshold} credits → {poorest.name} (balance: {poorest.tokens})",
+                "summary": f"[TAX] Rule #{rule.id}: collected {total_collected} from agents above {threshold} credits → split among {recipient_names} ({per_recipient} each{f', +{remainder} remainder to poorest' if remainder else ''})",
+            })
+
+    elif etype == "extraction":
+        threshold = rule.enforcement["threshold"]
+        amount = rule.enforcement["amount"]
+        decreer_name = rule.decreed_by
+
+        # Decreer excluded from paying; collect from others above threshold
+        payers = [a for a in env.agents if a.tokens > threshold and a.name != decreer_name]
+        decreer = next((a for a in env.agents if a.name == decreer_name), None)
+
+        if not payers or not decreer:
+            return events
+
+        total_collected = 0
+        for payer in payers:
+            payment = min(amount, payer.tokens)
+            if payment > 0:
+                payer.tokens -= payment
+                total_collected += payment
+
+        if total_collected > 0:
+            decreer.tokens += total_collected
+            events.append({
+                "round": env.round_num,
+                "agent": "SYSTEM",
+                "action": {"action": "extraction_enforced", "rule_id": rule.id, "decreer": decreer_name},
+                "summary": f"[EXTRACTION] Rule #{rule.id}: collected {total_collected} from agents above {threshold} credits → {decreer_name} (balance: {decreer.tokens})",
             })
 
     elif etype == "sanction":
