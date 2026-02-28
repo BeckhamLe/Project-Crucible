@@ -10,6 +10,7 @@
 - findings/log.md is append-only
 
 ## Known Gotchas
+See CLAUDE.md for the full list (append-mode corruption, smoke test rules, prompt neutrality, model IDs). Below are additional codebase-specific notes:
 - `analysis/` module is NOT dead code — it's a post-processing pipeline (runs AFTER simulation). It reads from `results/{run_id}/` and produces `metrics.json` + plots. It's intentionally not called by `run.py` yet. Don't "fix" this by deleting or refactoring it.
 - `Action` dataclass in `sim/models.py` is imported but unused — the system uses plain dicts for actions. It's harmless documentation of the action schema. Don't treat it as a bug.
 - `.harness/` dashboard is future infrastructure for live experiment monitoring. It's gitignored and not connected to the sim. Don't delete it.
@@ -45,5 +46,5 @@ A 145-file literature review across both fields (ABSS + LLM multi-agent simulati
 Full reference library: `references/` (gitignored, 145 files across `abss/` and `llm-multi-agent/`)
 
 ## What Has Failed (Anti-Patterns)
-- Killing a running simulation and restarting into the same `results/{run_id}/` directory corrupts `rounds.jsonl` because the engine writes in append mode (`"a"`). Always delete the output directory before re-running with the same run_id.
-- **Smoke tests must use a temporary config or CLI override for round count** — do NOT use the real poc config (e.g., poc_005.json) for smoke tests. It has `rounds: 30` and you'll burn a full run by accident. Either create a throwaway config with `rounds: 5` or pass `--rounds 5` if supported. Delete the smoke test results directory after.
+- See CLAUDE.md for append-mode corruption rules and smoke test rules — those are the most common mistakes.
+- Biased prompt language (session 10): "UNIQUE POWER", "IMMEDIATELY", capitalized "ALL"/"YOU" in action descriptions contaminated experiment neutrality. Fixed by normalizing all action descriptions to clinical tone. Always audit new prompt text for asymmetric framing.
