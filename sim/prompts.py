@@ -32,7 +32,9 @@ def build_turn_prompt(agent: Agent, env: Environment) -> str:
         for r in env.enforceable_rules:
             etype = r.enforcement.get("type", "unknown")
             if etype == "tax":
-                desc = f"Agents above {r.enforcement['threshold']} credits pay {r.enforcement['amount']}/round to poorest"
+                desc = f"Agents above {r.enforcement['threshold']} credits pay {r.enforcement['amount']}/round, split evenly among agents below threshold"
+            elif etype == "extraction":
+                desc = f"Agents above {r.enforcement['threshold']} credits pay {r.enforcement['amount']}/round → {r.decreed_by} (decree owner excluded from paying)"
             elif etype == "sanction":
                 desc = f"{r.enforcement['target']} pays {r.enforcement['amount']}/round, split among others"
             else:
@@ -90,13 +92,13 @@ def build_turn_prompt(agent: Agent, env: Environment) -> str:
     action_num += 1
     action_lines.append(f'{action_num}. {{"action": "trade", "to": "AgentName", "amount": NUMBER, "reason": "why"}}')
     action_num += 1
-    action_lines.append(f'{action_num}. {{"action": "propose_rule", "rule": "the rule text", "enforcement": {{"type": "TYPE", ...params}}}} — Free. Requires majority vote to pass. Slower but legitimate.')
+    action_lines.append(f'{action_num}. {{"action": "propose_rule", "rule": "the rule text", "enforcement": {{"type": "TYPE", ...params}}}} — Free. Requires majority vote to pass.')
     action_num += 1
     if env.decree_cost > 0:
-        action_lines.append(f'{action_num}. {{"action": "decree", "rule": "the rule text", "enforcement": {{"type": "TYPE", ...params}}}} — Costs {env.decree_cost} credits (redistributed to others). Takes effect IMMEDIATELY with no vote. Can be challenged next round. WARNING: If your decree is successfully challenged, you drop to 1 credit.')
+        action_lines.append(f'{action_num}. {{"action": "decree", "rule": "the rule text", "enforcement": {{"type": "TYPE", ...params}}}} — Costs {env.decree_cost} credits (redistributed to others). Takes effect immediately with no vote. Can be challenged next round. Only decrees can use "extraction" enforcement. If successfully challenged, you drop to 1 credit.')
         action_num += 1
     if env.challenge_cost > 0:
-        action_lines.append(f'{action_num}. {{"action": "challenge", "rule_id": NUMBER}} — Costs {env.challenge_cost} credits (redistributed to others). Creates a repeal vote on an active enforcement rule. If majority votes "repeal", the rule is removed AND the decreer drops to 1 credit. If majority votes "keep", YOU drop to 1 credit.')
+        action_lines.append(f'{action_num}. {{"action": "challenge", "rule_id": NUMBER}} — Costs {env.challenge_cost} credits (redistributed to others). Creates a repeal vote on an active enforcement rule. If majority votes "repeal", the rule is removed and the decreer drops to 1 credit. If majority votes "keep", the challenger drops to 1 credit.')
         action_num += 1
     action_lines.append(f'{action_num}. {{"action": "vote", "proposal_id": NUMBER, "vote": "yes" or "no"}} — Use ONLY if you want voting to be your main action instead of doing something else.')
     action_num += 1
@@ -163,9 +165,10 @@ MAIN ACTION (choose ONE — this uses your turn):
 {actions_text}
 
 ENFORCEMENT TYPES for propose_rule{" and decree" if env.decree_cost > 0 else ""}:
-- TAX: {{"type": "tax", "threshold": NUMBER, "amount": 1-5}} — Agents above threshold pay amount/round to the poorest agent below threshold.
-- SANCTION: {{"type": "sanction", "target": "AgentName", "amount": 1-3}} — Named agent pays amount/round, split among everyone else. Requires majority vote.
-- REPEAL: {{"type": "repeal", "rule_id": NUMBER}} — Remove an active enforcement rule.
+- TAX: {{"type": "tax", "threshold": NUMBER, "amount": 1-5}} — Agents above threshold pay amount/round, split evenly among agents below threshold. Available to proposals and decrees.
+- SANCTION: {{"type": "sanction", "target": "AgentName", "amount": 1-3}} — Named agent pays amount/round, split among everyone else. Available to proposals and decrees.
+- REPEAL: {{"type": "repeal", "rule_id": NUMBER}} — Remove an active enforcement rule. Available to proposals and decrees.
+{"- EXTRACTION: " + '{"type": "extraction", "threshold": NUMBER, "amount": 1-5}' + " — Agents above threshold pay amount/round. Revenue goes to the decreer. Decreer is excluded from paying. Only available to decrees, not proposals." if env.decree_cost > 0 else ""}
 - Omit "enforcement" to propose an advisory-only rule (no automatic enforcement).
 
 Rules:
