@@ -1,0 +1,14 @@
+{
+  "run_id": "poc_003_5",
+  "config": "configs/runs/poc_003_5.json",
+  "timestamp": "2026-02-27T14:00:00Z",
+  "verdict": "PASS",
+  "health_checks": {
+    "simulation_complete": {"status": "PASS", "detail": "30/30 rounds"},
+    "parse_error_rate": {"status": "PASS", "detail": "0.0% (0/191 actions)", "rate": 0.0},
+    "economic_viability": {"status": "PASS", "detail": "Pool: 26 credits. Builder: 11, Rebel: 7, Judge: 8"},
+    "governance_activity": {"status": "PASS", "detail": "2 proposals, 0 decrees"},
+    "data_integrity": {"status": "PASS", "detail": "All 30 rounds valid JSON, sequential"}
+  },
+  "acceptance_criteria": {}
+}
